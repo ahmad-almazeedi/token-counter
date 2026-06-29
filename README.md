@@ -7,7 +7,7 @@ No build step, no dependencies — just `index.html`, `style.css`, and `script.j
 ## Features
 
 - 📋 Paste or type text into a large, rounded canvas
-- 🔢 Live **character count** (plus words, lines, and characters without spaces)
+- 🔢 Live **character count**
 - 🌗 **Light / dark mode** that follows your system setting automatically, and remembers your choice if you toggle it manually
 - 🎨 Modern, minimal design with large, bold, rounded type and shapes
 

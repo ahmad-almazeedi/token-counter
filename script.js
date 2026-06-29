@@ -1,9 +1,6 @@
 // ---------- Elements ----------
 const input = document.getElementById("input");
 const charCountEl = document.getElementById("charCount");
-const wordCountEl = document.getElementById("wordCount");
-const lineCountEl = document.getElementById("lineCount");
-const noSpaceCountEl = document.getElementById("noSpaceCount");
 const themeToggle = document.getElementById("themeToggle");
 const themeIcon = themeToggle.querySelector(".theme-toggle__icon");
 
@@ -11,17 +8,7 @@ const nf = new Intl.NumberFormat();
 
 // ---------- Counting ----------
 function updateCounts() {
-  const text = input.value;
-
-  const chars = text.length;
-  const noSpaces = text.replace(/\s/g, "").length;
-  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-  const lines = text ? text.split(/\r\n|\r|\n/).length : 0;
-
-  charCountEl.textContent = nf.format(chars);
-  wordCountEl.textContent = nf.format(words);
-  lineCountEl.textContent = nf.format(lines);
-  noSpaceCountEl.textContent = nf.format(noSpaces);
+  charCountEl.textContent = nf.format(input.value.length);
 }
 
 input.addEventListener("input", updateCounts);
