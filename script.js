@@ -14,13 +14,30 @@ function updateCounts() {
   pasteBtn.classList.toggle("paste-btn--hidden", input.value.length > 0);
 }
 
-// Grow the box downward to fit its content (CSS min-height sets the floor).
+// Grow the box downward to fit its content, but only until its bottom reaches
+// the padded bottom of the screen — past that, scroll inside the box instead.
 function autoGrow() {
+  // Measure the full content height with the CSS min-height as the floor.
   input.style.height = "auto";
+  input.style.minHeight = "";
   const cs = getComputedStyle(input);
   const borders =
     parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
-  input.style.height = input.scrollHeight + borders + "px";
+  const needed = input.scrollHeight + borders;
+
+  // Space from the box's top down to the padded bottom of the viewport.
+  const docTop = input.getBoundingClientRect().top + window.scrollY;
+  const bottomGap = parseFloat(getComputedStyle(document.body).paddingBottom) || 24;
+  const maxHeight = Math.max(window.innerHeight - docTop - bottomGap, 120);
+
+  if (needed > maxHeight) {
+    input.style.minHeight = maxHeight + "px";
+    input.style.height = maxHeight + "px";
+    input.style.overflowY = "auto";
+  } else {
+    input.style.height = needed + "px";
+    input.style.overflowY = "hidden";
+  }
 }
 
 input.addEventListener("input", () => {

@@ -83,6 +83,7 @@ body {
 
 /* ---------- Text canvas ---------- */
 .input {
+  display: block;
   width: 100%;
   min-height: clamp(180px, 30vh, 300px);
   resize: none;
