@@ -1,3 +1,5 @@
 .DS_Store
 node_modules/
 *.log
+# local dev-only live-reload server (not part of the site)
+dev-server.mjs
