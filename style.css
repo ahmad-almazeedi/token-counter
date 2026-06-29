@@ -66,12 +66,12 @@ body {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: calc(100% + clamp(1rem, 3vw, 1.75rem));
+  bottom: calc(100% + clamp(2rem, 5vw, 3.25rem));
   text-align: center;
 }
 
 .counter__value {
-  font-size: clamp(3.5rem, 13vw, 7rem);
+  font-size: clamp(2.5rem, 9vw, 5rem);
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.04em;
