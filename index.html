@@ -31,15 +31,24 @@
       <div class="counter__label">characters</div>
     </section>
 
-    <textarea
-      id="input"
-      class="input"
-      placeholder="Paste or type your text here…"
-      spellcheck="false"
-      autocomplete="off"
-      autocapitalize="off"
-      autofocus
-    ></textarea>
+    <div class="box">
+      <textarea
+        id="input"
+        class="input"
+        aria-label="Text to count"
+        spellcheck="false"
+        autocomplete="off"
+        autocapitalize="off"
+      ></textarea>
+
+      <button id="pasteBtn" class="paste-btn" type="button" aria-label="Paste from clipboard">
+        <svg class="paste-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="8" y="3" width="8" height="4" rx="1.5"></rect>
+          <path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"></path>
+        </svg>
+        <span>Paste</span>
+      </button>
+    </div>
   </main>
 
   <script src="script.js"></script>

@@ -110,6 +110,54 @@ body {
   opacity: 0.7;
 }
 
+/* ---------- Paste button (empty state) ---------- */
+.box {
+  position: relative;
+}
+
+.paste-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.4rem;
+  font: inherit;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.15s ease;
+}
+
+.paste-btn:hover {
+  border-color: var(--accent);
+  transform: translate(-50%, -50%) scale(1.04);
+}
+
+.paste-btn:active {
+  transform: translate(-50%, -50%) scale(0.98);
+}
+
+.paste-btn:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.paste-btn__icon {
+  width: 18px;
+  height: 18px;
+}
+
+.paste-btn--hidden {
+  display: none;
+}
+
 /* ---------- Theme toggle ---------- */
 .theme-toggle {
   position: fixed;

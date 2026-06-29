@@ -3,15 +3,32 @@ const input = document.getElementById("input");
 const charCountEl = document.getElementById("charCount");
 const themeToggle = document.getElementById("themeToggle");
 const themeIcon = themeToggle.querySelector(".theme-toggle__icon");
+const pasteBtn = document.getElementById("pasteBtn");
 
 const nf = new Intl.NumberFormat();
 
 // ---------- Counting ----------
 function updateCounts() {
   charCountEl.textContent = nf.format(input.value.length);
+  // Show the Paste button only while the box is empty.
+  pasteBtn.classList.toggle("paste-btn--hidden", input.value.length > 0);
 }
 
 input.addEventListener("input", updateCounts);
+
+// ---------- Paste ----------
+pasteBtn.addEventListener("click", async () => {
+  try {
+    const text = await navigator.clipboard.readText();
+    if (text) {
+      input.value = text;
+      updateCounts();
+    }
+  } catch (e) {
+    // Clipboard read was blocked — fall back to manual paste.
+  }
+  input.focus();
+});
 
 // ---------- Theme ----------
 const SUN = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5 5l1.4 1.4M17.6 17.6L19 19M19 5l-1.4 1.4M6.4 17.6L5 19"/></svg>`;
