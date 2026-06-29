@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Token Counter</title>
+  <meta name="description" content="A minimal canvas to paste text and instantly see its character count. Token counts and model pricing coming soon." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔢</text></svg>" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Set theme before first paint to avoid a flash of the wrong mode -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("theme");
+        if (t === "light" || t === "dark") {
+          document.documentElement.setAttribute("data-theme", t);
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch color theme">
+    <span class="theme-toggle__icon" aria-hidden="true"></span>
+  </button>
+
+  <main class="app">
+    <section class="counter" aria-live="polite">
+      <div class="counter__value" id="charCount">0</div>
+      <div class="counter__label">characters</div>
+    </section>
+
+    <textarea
+      id="input"
+      class="input"
+      placeholder="Paste or type your text here…"
+      spellcheck="false"
+      autocomplete="off"
+      autocapitalize="off"
+      autofocus
+    ></textarea>
+
+    <section class="stats" aria-label="Text statistics">
+      <div class="stat">
+        <span class="stat__value" id="wordCount">0</span>
+        <span class="stat__label">words</span>
+      </div>
+      <div class="stat">
+        <span class="stat__value" id="lineCount">0</span>
+        <span class="stat__label">lines</span>
+      </div>
+      <div class="stat">
+        <span class="stat__value" id="noSpaceCount">0</span>
+        <span class="stat__label">no spaces</span>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

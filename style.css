@@ -1,0 +1,211 @@
+/* ---------- Theme tokens ---------- */
+:root {
+  --bg: #f3f4f6;
+  --surface: #ffffff;
+  --text: #18181b;
+  --muted: #71717a;
+  --accent: #6366f1;
+  --border: #e5e7eb;
+  --ring: rgba(99, 102, 241, 0.35);
+  --shadow: 0 20px 50px -20px rgba(24, 24, 27, 0.18);
+}
+
+/* Follow the system setting unless the user has picked a theme manually */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --bg: #0a0a0b;
+    --surface: #161618;
+    --text: #fafafa;
+    --muted: #a1a1aa;
+    --accent: #818cf8;
+    --border: #2a2a2e;
+    --ring: rgba(129, 140, 248, 0.4);
+    --shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* Manual override (wins over the system preference above) */
+:root[data-theme="dark"] {
+  --bg: #0a0a0b;
+  --surface: #161618;
+  --text: #fafafa;
+  --muted: #a1a1aa;
+  --accent: #818cf8;
+  --border: #2a2a2e;
+  --ring: rgba(129, 140, 248, 0.4);
+  --shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------- Base ---------- */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-rounded, "SF Pro Rounded", "Hiragino Maru Gothic ProN",
+    "Quicksand", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.25rem, 4vw, 3rem);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ---------- App layout ---------- */
+.app {
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.25rem, 3vw, 2rem);
+}
+
+/* ---------- Hero counter ---------- */
+.counter {
+  text-align: center;
+}
+
+.counter__value {
+  font-size: clamp(4rem, 16vw, 9rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.counter__label {
+  margin-top: 0.4rem;
+  font-size: clamp(1rem, 3vw, 1.35rem);
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.01em;
+}
+
+/* ---------- Text canvas ---------- */
+.input {
+  width: 100%;
+  min-height: clamp(180px, 34vh, 320px);
+  resize: vertical;
+  padding: clamp(1.1rem, 3vw, 1.6rem);
+  font: inherit;
+  font-weight: 500;
+  font-size: 1.075rem;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease,
+    background-color 0.3s ease, color 0.3s ease;
+}
+
+.input::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: var(--shadow), 0 0 0 4px var(--ring);
+}
+
+/* ---------- Secondary stats ---------- */
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(0.6rem, 2vw, 1rem);
+}
+
+.stat {
+  flex: 1 1 0;
+  min-width: 96px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 22px;
+  padding: 1rem 0.75rem;
+  text-align: center;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.stat__value {
+  display: block;
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.stat__label {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* ---------- Theme toggle ---------- */
+.theme-toggle {
+  position: fixed;
+  top: clamp(1rem, 3vw, 1.75rem);
+  right: clamp(1rem, 3vw, 1.75rem);
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease, border-color 0.2s ease,
+    background-color 0.3s ease;
+}
+
+.theme-toggle:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+
+.theme-toggle:active {
+  transform: translateY(0);
+}
+
+.theme-toggle:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow), 0 0 0 4px var(--ring);
+}
+
+.theme-toggle__icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.theme-toggle__icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
