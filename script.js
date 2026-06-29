@@ -14,7 +14,21 @@ function updateCounts() {
   pasteBtn.classList.toggle("paste-btn--hidden", input.value.length > 0);
 }
 
-input.addEventListener("input", updateCounts);
+// Grow the box downward to fit its content (CSS min-height sets the floor).
+function autoGrow() {
+  input.style.height = "auto";
+  const cs = getComputedStyle(input);
+  const borders =
+    parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
+  input.style.height = input.scrollHeight + borders + "px";
+}
+
+input.addEventListener("input", () => {
+  updateCounts();
+  autoGrow();
+});
+
+window.addEventListener("resize", autoGrow);
 
 // ---------- Paste ----------
 pasteBtn.addEventListener("click", async () => {
@@ -23,6 +37,7 @@ pasteBtn.addEventListener("click", async () => {
     if (text) {
       input.value = text;
       updateCounts();
+      autoGrow();
     }
   } catch (e) {
     // Clipboard read was blocked — fall back to manual paste.
@@ -75,4 +90,5 @@ systemDark.addEventListener("change", () => {
 
 // ---------- Init ----------
 updateCounts();
+autoGrow();
 renderIcon();
