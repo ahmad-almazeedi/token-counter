@@ -107,7 +107,7 @@ body {
 
 .input::placeholder {
   color: var(--muted);
-  opacity: 0.7;
+  opacity: 0.45;
 }
 
 /* ---------- Paste button (empty state) ---------- */
