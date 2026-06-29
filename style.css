@@ -4,7 +4,7 @@
   --text: #18181b;
   --muted: #71717a;
   --accent: #6366f1;
-  --border: #e5e7eb;
+  --border: #d9d9d9;
 }
 
 /* Follow the system setting unless the user has picked a theme manually */
@@ -14,7 +14,7 @@
     --text: #fafafa;
     --muted: #a1a1aa;
     --accent: #818cf8;
-    --border: #2a2a2e;
+    --border: #262626;
   }
 }
 
@@ -24,7 +24,7 @@
   --text: #fafafa;
   --muted: #a1a1aa;
   --accent: #818cf8;
-  --border: #2a2a2e;
+  --border: #262626;
 }
 
 /* ---------- Base ---------- */
@@ -96,7 +96,7 @@ body {
   line-height: 1.6;
   color: var(--text);
   background: transparent;
-  border: 2px solid var(--border);
+  border: 1px solid var(--border);
   border-radius: 28px;
   outline: none;
   transition: border-color 0.2s ease, color 0.3s ease;
@@ -116,7 +116,7 @@ body {
   height: 52px;
   display: grid;
   place-items: center;
-  border: 2px solid var(--border);
+  border: 1px solid var(--border);
   border-radius: 50%;
   background: transparent;
   color: var(--text);
