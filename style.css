@@ -53,7 +53,7 @@ body {
 /* ---------- App layout ---------- */
 .app {
   width: 100%;
-  max-width: 680px;
+  max-width: 780px;
   display: flex;
   flex-direction: column;
   gap: clamp(2rem, 5vw, 3.25rem);
