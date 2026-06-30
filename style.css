@@ -106,53 +106,68 @@ body {
   opacity: 0.45;
 }
 
-/* ---------- Paste button (empty state) ---------- */
+/* ---------- Paste zone (empty state) ---------- */
 .box {
   position: relative;
 }
 
-.paste-btn {
-  /* A more visible version of the border color (same neutral hue). */
+/* The whole empty box is the paste target; it overlays the textarea. */
+.paste-zone {
   --paste-hover: color-mix(in srgb, var(--border) 60%, var(--text));
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: inline-flex;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.7rem;
-  padding: 1.5rem 3rem;
-  font: inherit;
-  font-weight: 700;
-  font-size: 1rem;
-  color: var(--text);
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 999px;
+  justify-content: center;
+  gap: 1.1rem;
+  border-radius: 28px;
   cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  transition: box-shadow 0.2s ease;
 }
 
-.paste-btn:hover {
+.paste-zone:hover,
+.paste-zone:focus-visible {
+  outline: none;
   box-shadow: 0 0 14px 0 color-mix(in srgb, var(--paste-hover) 26%, transparent);
 }
 
-.paste-btn:active {
-  transform: translate(-50%, -50%) scale(0.98);
-}
-
-.paste-btn:focus-visible {
-  outline: none;
-  border-color: var(--paste-hover);
-}
-
-.paste-btn__icon {
-  width: 18px;
-  height: 18px;
-}
-
-.paste-btn--hidden {
+.paste-zone--hidden {
   display: none;
+}
+
+.paste-zone__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--text);
+}
+
+.paste-zone__icon {
+  width: 22px;
+  height: 22px;
+}
+
+/* The small "or type" link — the only way into typing mode. */
+.type-link {
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: none;
+  border: none;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.type-link:hover,
+.type-link:focus-visible {
+  outline: none;
+  color: var(--text);
 }
 
 /* ---------- Theme toggle ---------- */

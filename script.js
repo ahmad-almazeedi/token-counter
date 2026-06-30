@@ -3,15 +3,26 @@ const input = document.getElementById("input");
 const charCountEl = document.getElementById("charCount");
 const themeToggle = document.getElementById("themeToggle");
 const themeIcon = themeToggle.querySelector(".theme-toggle__icon");
-const pasteBtn = document.getElementById("pasteBtn");
+const pasteZone = document.getElementById("pasteZone");
+const typeLink = document.getElementById("typeLink");
 
 const nf = new Intl.NumberFormat();
 
+// Once the user chooses to type (or pastes), the box is a normal text field;
+// the paste zone only comes back on reload.
+let typingMode = false;
+
 // ---------- Counting ----------
+function syncPasteZone() {
+  const showZone = input.value.length === 0 && !typingMode;
+  pasteZone.classList.toggle("paste-zone--hidden", !showZone);
+  // Hide the typing placeholder while the paste zone covers the box.
+  input.placeholder = showZone ? "" : "Type here";
+}
+
 function updateCounts() {
   charCountEl.textContent = nf.format(input.value.length);
-  // Show the Paste button only while the box is empty.
-  pasteBtn.classList.toggle("paste-btn--hidden", input.value.length > 0);
+  syncPasteZone();
 }
 
 // Grow the box downward to fit its content, but only until its bottom reaches
@@ -47,8 +58,9 @@ input.addEventListener("input", () => {
 
 window.addEventListener("resize", autoGrow);
 
-// ---------- Paste ----------
-pasteBtn.addEventListener("click", async () => {
+// ---------- Paste / type ----------
+// The whole empty box pastes; the small "or type" link is the only way to type.
+async function doPaste() {
   try {
     const text = await navigator.clipboard.readText();
     if (text) {
@@ -57,8 +69,25 @@ pasteBtn.addEventListener("click", async () => {
       autoGrow();
     }
   } catch (e) {
-    // Clipboard read was blocked — fall back to manual paste.
+    // Clipboard read was blocked — switch to typing so the user can paste manually.
+    typingMode = true;
+    syncPasteZone();
   }
+  input.focus();
+}
+
+pasteZone.addEventListener("click", doPaste);
+pasteZone.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    doPaste();
+  }
+});
+
+typeLink.addEventListener("click", (e) => {
+  e.stopPropagation();
+  typingMode = true;
+  syncPasteZone();
   input.focus();
 });
 
