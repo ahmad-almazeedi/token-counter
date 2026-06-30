@@ -141,7 +141,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.7rem;
-  font-weight: 500;
+  font-weight: 400;
   font-size: 1.15rem;
   color: var(--muted);
   transition: color 0.2s ease;
