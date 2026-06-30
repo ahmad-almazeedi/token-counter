@@ -126,6 +126,7 @@ body {
   transition: box-shadow 0.2s ease;
 }
 
+/* Hovering the box (paste area) glows and lightens the Paste hint. */
 .paste-zone:hover,
 .paste-zone:focus-visible {
   outline: none;
@@ -142,6 +143,11 @@ body {
   gap: 0.7rem;
   font-weight: 700;
   font-size: 1.15rem;
+  color: var(--muted);
+  transition: color 0.2s ease;
+}
+
+.paste-zone:hover .paste-zone__hint {
   color: var(--text);
 }
 
@@ -150,24 +156,37 @@ body {
   height: 22px;
 }
 
-/* The small "or type" link — the only way into typing mode. */
-.type-link {
-  font: inherit;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--muted);
-  background: none;
+/* ---------- Clear button ---------- */
+.clear-btn {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
   border: none;
-  padding: 0.35rem 0.7rem;
-  border-radius: 999px;
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--muted);
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
 
-.type-link:hover,
-.type-link:focus-visible {
+.clear-btn:hover,
+.clear-btn:focus-visible {
   outline: none;
   color: var(--text);
+  background: color-mix(in srgb, var(--border) 55%, transparent);
+}
+
+.clear-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.clear-btn--hidden {
+  display: none;
 }
 
 /* ---------- Theme toggle ---------- */

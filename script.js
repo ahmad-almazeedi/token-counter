@@ -4,21 +4,33 @@ const charCountEl = document.getElementById("charCount");
 const themeToggle = document.getElementById("themeToggle");
 const themeIcon = themeToggle.querySelector(".theme-toggle__icon");
 const pasteZone = document.getElementById("pasteZone");
-const typeLink = document.getElementById("typeLink");
+const clearBtn = document.getElementById("clearBtn");
 
 const nf = new Intl.NumberFormat();
 
-// Once the user chooses to type (or pastes), the box is a normal text field;
-// the paste zone only comes back on reload.
-let typingMode = false;
+// Tracked explicitly — document.activeElement is unreliable during the blur event.
+let inputFocused = false;
 
 // ---------- Counting ----------
+// The paste zone covers the box only when it's empty AND not focused (no
+// blinking cursor). The clear button shows whenever there's text.
 function syncPasteZone() {
-  const showZone = input.value.length === 0 && !typingMode;
+  const empty = input.value.length === 0;
+  const showZone = empty && !inputFocused;
   pasteZone.classList.toggle("paste-zone--hidden", !showZone);
+  clearBtn.classList.toggle("clear-btn--hidden", empty);
   // Hide the typing placeholder while the paste zone covers the box.
   input.placeholder = showZone ? "" : "Type here";
 }
+
+input.addEventListener("focus", () => {
+  inputFocused = true;
+  syncPasteZone();
+});
+input.addEventListener("blur", () => {
+  inputFocused = false;
+  syncPasteZone();
+});
 
 function updateCounts() {
   charCountEl.textContent = nf.format(input.value.length);
@@ -69,11 +81,11 @@ async function doPaste() {
       autoGrow();
     }
   } catch (e) {
-    // Clipboard read was blocked — switch to typing so the user can paste manually.
-    typingMode = true;
-    syncPasteZone();
+    // Clipboard read was blocked — focus the box so the user can paste manually.
   }
   input.focus();
+  inputFocused = true;
+  syncPasteZone();
 }
 
 pasteZone.addEventListener("click", doPaste);
@@ -84,11 +96,28 @@ pasteZone.addEventListener("keydown", (e) => {
   }
 });
 
-typeLink.addEventListener("click", (e) => {
-  e.stopPropagation();
-  typingMode = true;
-  syncPasteZone();
+// Typing anywhere on the page starts typing in the box and captures the key.
+document.addEventListener("keydown", (e) => {
+  if (inputFocused) return; // already typing
+  if (e.metaKey || e.ctrlKey || e.altKey) return; // leave shortcuts alone
+  if (e.key.length !== 1 || e.key === " ") return; // only printable, non-space
+  // Focusing mid-keydown won't redirect this keystroke, so insert it manually;
+  // subsequent keys type natively into the now-focused box.
+  e.preventDefault();
   input.focus();
+  inputFocused = true;
+  input.value += e.key;
+  updateCounts();
+  autoGrow();
+});
+
+// ---------- Clear ----------
+clearBtn.addEventListener("click", () => {
+  input.value = "";
+  inputFocused = false;
+  input.blur(); // return to the paste-zone state
+  updateCounts();
+  autoGrow();
 });
 
 // ---------- Theme ----------
