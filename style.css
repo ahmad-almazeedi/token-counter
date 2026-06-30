@@ -134,7 +134,7 @@ body {
 }
 
 .paste-btn:hover {
-  box-shadow: 0 0 18px 1px color-mix(in srgb, var(--paste-hover) 45%, transparent);
+  box-shadow: 0 0 14px 0 color-mix(in srgb, var(--paste-hover) 26%, transparent);
 }
 
 .paste-btn:active {
