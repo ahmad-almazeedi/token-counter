@@ -112,6 +112,8 @@ body {
 }
 
 .paste-btn {
+  /* A more visible version of the border color (same neutral hue). */
+  --paste-hover: color-mix(in srgb, var(--border) 60%, var(--text));
   position: absolute;
   top: 50%;
   left: 50%;
@@ -128,12 +130,12 @@ body {
   border: 1px solid var(--border);
   border-radius: 999px;
   cursor: pointer;
-  transition: border-color 0.2s ease, transform 0.15s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
 .paste-btn:hover {
-  border-color: var(--accent);
-  transform: translate(-50%, -50%) scale(1.04);
+  border-color: var(--paste-hover);
+  box-shadow: 0 0 18px 1px color-mix(in srgb, var(--paste-hover) 45%, transparent);
 }
 
 .paste-btn:active {
@@ -142,7 +144,7 @@ body {
 
 .paste-btn:focus-visible {
   outline: none;
-  border-color: var(--accent);
+  border-color: var(--paste-hover);
 }
 
 .paste-btn__icon {
