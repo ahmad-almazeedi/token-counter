@@ -51,7 +51,14 @@ function autoGrow() {
   // Space from the box's top down to the padded bottom of the viewport.
   const docTop = input.getBoundingClientRect().top + window.scrollY;
   const bottomGap = parseFloat(getComputedStyle(document.body).paddingBottom) || 24;
-  const maxHeight = Math.max(window.innerHeight - docTop - bottomGap, 120);
+  // Leave room below the box for the clear button (it sits just under the box).
+  const clearReserve = clearBtn.classList.contains("clear-btn--hidden")
+    ? 0
+    : clearBtn.offsetHeight + 12;
+  const maxHeight = Math.max(
+    window.innerHeight - docTop - bottomGap - clearReserve,
+    120
+  );
 
   if (needed > maxHeight) {
     input.style.minHeight = maxHeight + "px";

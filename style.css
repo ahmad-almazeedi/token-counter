@@ -160,8 +160,8 @@ body {
 .clear-btn {
   --clear-accent: color-mix(in srgb, var(--border) 55%, var(--text));
   position: absolute;
-  top: 0.85rem;
-  right: 0.85rem;
+  top: calc(100% + 0.75rem);
+  right: 0;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -174,14 +174,13 @@ body {
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .clear-btn:hover,
 .clear-btn:focus-visible {
   outline: none;
   color: var(--text);
-  border-color: var(--clear-accent);
   box-shadow: 0 0 12px 0 color-mix(in srgb, var(--clear-accent) 28%, transparent);
 }
 
