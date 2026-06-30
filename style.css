@@ -158,34 +158,36 @@ body {
 
 /* ---------- Clear button ---------- */
 .clear-btn {
+  --clear-accent: color-mix(in srgb, var(--border) 55%, var(--text));
   position: absolute;
-  top: 0.7rem;
-  right: 0.7rem;
+  top: 0.85rem;
+  right: 0.85rem;
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.6rem 1.05rem 0.6rem 0.85rem;
-  border: none;
+  gap: 0.4rem;
+  padding: 0.5rem 0.95rem 0.5rem 0.75rem;
+  border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--bg);
   color: var(--muted);
   font: inherit;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: color 0.2s ease, background-color 0.2s ease;
+  transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .clear-btn:hover,
 .clear-btn:focus-visible {
   outline: none;
   color: var(--text);
-  background: color-mix(in srgb, var(--border) 55%, transparent);
+  border-color: var(--clear-accent);
+  box-shadow: 0 0 12px 0 color-mix(in srgb, var(--clear-accent) 28%, transparent);
 }
 
 .clear-btn__icon {
-  width: 20px;
-  height: 20px;
+  width: 17px;
+  height: 17px;
 }
 
 .clear-btn--hidden {
