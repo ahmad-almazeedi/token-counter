@@ -31,36 +31,48 @@
       <div class="counter__label">characters</div>
     </section>
 
-    <div class="box">
-      <textarea
-        id="input"
-        class="input"
-        aria-label="Text to count"
-        placeholder="Type here"
-        spellcheck="false"
-        autocomplete="off"
-        autocapitalize="off"
-      ></textarea>
+    <div class="editor">
+      <div class="box-tools">
+        <button id="previewBtn" class="pill-btn preview-btn preview-btn--hidden" type="button" aria-label="View Markdown rendering">
+          <span class="pill-btn__icon" aria-hidden="true"></span>
+          <span class="pill-btn__label">Markdown</span>
+        </button>
 
-      <div id="pasteZone" class="paste-zone" role="button" tabindex="0" aria-label="Paste from clipboard">
-        <span class="paste-zone__hint">
-          <svg class="paste-zone__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="8" y="3" width="8" height="4" rx="1.5"></rect>
-            <path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"></path>
+        <button id="clearBtn" class="pill-btn clear-btn clear-btn--hidden" type="button" aria-label="Clear text">
+          <svg class="pill-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18"></path>
           </svg>
-          <span>Paste</span>
-        </span>
+          <span>Clear</span>
+        </button>
       </div>
 
-      <button id="clearBtn" class="clear-btn clear-btn--hidden" type="button" aria-label="Clear text">
-        <svg class="clear-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
-          <path d="M6 6l12 12M18 6L6 18"></path>
-        </svg>
-        <span>Clear</span>
-      </button>
+      <div class="box">
+        <textarea
+          id="input"
+          class="input"
+          aria-label="Text to count"
+          placeholder="Type here"
+          spellcheck="false"
+          autocomplete="off"
+          autocapitalize="off"
+        ></textarea>
+
+        <div id="preview" class="preview preview--hidden" aria-live="polite"></div>
+
+        <div id="pasteZone" class="paste-zone" role="button" tabindex="0" aria-label="Paste from clipboard">
+          <span class="paste-zone__hint">
+            <svg class="paste-zone__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="8" y="3" width="8" height="4" rx="1.5"></rect>
+              <path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"></path>
+            </svg>
+            <span>Paste</span>
+          </span>
+        </div>
+      </div>
     </div>
   </main>
 
+  <script src="markdown.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

@@ -5,11 +5,17 @@ const themeToggle = document.getElementById("themeToggle");
 const themeIcon = themeToggle.querySelector(".theme-toggle__icon");
 const pasteZone = document.getElementById("pasteZone");
 const clearBtn = document.getElementById("clearBtn");
+const preview = document.getElementById("preview");
+const previewBtn = document.getElementById("previewBtn");
+const previewIcon = previewBtn.querySelector(".pill-btn__icon");
+const previewLabel = previewBtn.querySelector(".pill-btn__label");
 
 const nf = new Intl.NumberFormat();
 
 // Tracked explicitly — document.activeElement is unreliable during the blur event.
 let inputFocused = false;
+// Whether the box is currently showing rendered Markdown instead of the textarea.
+let previewMode = false;
 
 // ---------- Counting ----------
 // The paste zone covers the box only when it's empty AND not focused (no
@@ -32,14 +38,61 @@ input.addEventListener("blur", () => {
   syncPasteZone();
 });
 
+// ---------- Markdown preview ----------
+const PREVIEW_EYE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const PREVIEW_PENCIL = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`;
+
+function renderPreviewBtn() {
+  previewIcon.innerHTML = previewMode ? PREVIEW_PENCIL : PREVIEW_EYE;
+  previewLabel.textContent = previewMode ? "Edit" : "Markdown";
+  previewBtn.setAttribute(
+    "aria-label",
+    previewMode ? "Back to editing" : "View Markdown rendering"
+  );
+}
+
+// Offer the preview button only when the text actually looks like Markdown.
+function syncMarkdown() {
+  const isMd = window.looksLikeMarkdown(input.value);
+  previewBtn.classList.toggle("preview-btn--hidden", !isMd);
+  // If we were previewing and the text no longer looks like Markdown, drop back.
+  if (!isMd && previewMode) exitPreview();
+}
+
+function enterPreview() {
+  previewMode = true;
+  preview.innerHTML = window.renderMarkdown(input.value);
+  preview.classList.remove("preview--hidden");
+  input.style.display = "none";
+  renderPreviewBtn();
+}
+
+function exitPreview() {
+  previewMode = false;
+  preview.classList.add("preview--hidden");
+  preview.innerHTML = "";
+  input.style.display = "";
+  renderPreviewBtn();
+  autoGrow();
+}
+
+previewBtn.addEventListener("click", () => {
+  if (previewMode) exitPreview();
+  else enterPreview();
+});
+
 function updateCounts() {
   charCountEl.textContent = nf.format(input.value.length);
   syncPasteZone();
+  syncMarkdown();
+  // Keep the live preview in sync if it's open while text changes programmatically.
+  if (previewMode) preview.innerHTML = window.renderMarkdown(input.value);
 }
 
 // Grow the box downward to fit its content, but only until its bottom reaches
 // the padded bottom of the screen — past that, scroll inside the box instead.
 function autoGrow() {
+  if (previewMode) return; // textarea is hidden; nothing to size
   // Measure the full content height with the CSS min-height as the floor.
   input.style.height = "auto";
   input.style.minHeight = "";
@@ -51,14 +104,7 @@ function autoGrow() {
   // Space from the box's top down to the padded bottom of the viewport.
   const docTop = input.getBoundingClientRect().top + window.scrollY;
   const bottomGap = parseFloat(getComputedStyle(document.body).paddingBottom) || 24;
-  // Leave room below the box for the clear button (it sits just under the box).
-  const clearReserve = clearBtn.classList.contains("clear-btn--hidden")
-    ? 0
-    : clearBtn.offsetHeight + 12;
-  const maxHeight = Math.max(
-    window.innerHeight - docTop - bottomGap - clearReserve,
-    120
-  );
+  const maxHeight = Math.max(window.innerHeight - docTop - bottomGap, 120);
 
   if (needed > maxHeight) {
     input.style.minHeight = maxHeight + "px";
@@ -80,15 +126,16 @@ window.addEventListener("resize", autoGrow);
 // ---------- Paste / type ----------
 // The whole empty box pastes; the small "or type" link is the only way to type.
 async function doPaste() {
+  let text;
   try {
-    const text = await navigator.clipboard.readText();
-    if (text) {
-      input.value = text;
-      updateCounts();
-      autoGrow();
-    }
+    text = await navigator.clipboard.readText();
   } catch (e) {
-    // Clipboard read was blocked — focus the box so the user can paste manually.
+    return; // dismissed or blocked — leave the paste zone untouched
+  }
+  if (text) {
+    input.value = text;
+    updateCounts();
+    autoGrow();
   }
   input.focus();
   inputFocused = true;
@@ -105,6 +152,7 @@ pasteZone.addEventListener("keydown", (e) => {
 
 // Typing anywhere on the page starts typing in the box and captures the key.
 document.addEventListener("keydown", (e) => {
+  if (previewMode) return; // showing rendered Markdown, not editing
   if (inputFocused) return; // already typing
   if (e.metaKey || e.ctrlKey || e.altKey) return; // leave shortcuts alone
   if (e.key.length !== 1 || e.key === " ") return; // only printable, non-space
@@ -118,9 +166,25 @@ document.addEventListener("keydown", (e) => {
   autoGrow();
 });
 
+// Cmd+V anywhere pastes into the box — the browser hands us the text directly
+// on a user-initiated paste, so no clipboard permission prompt is involved.
+document.addEventListener("paste", (e) => {
+  if (previewMode) return; // showing rendered Markdown, not editing
+  if (inputFocused) return; // native paste into the textarea handles it
+  const text = e.clipboardData && e.clipboardData.getData("text/plain");
+  if (!text) return;
+  e.preventDefault();
+  input.value += text;
+  input.focus();
+  inputFocused = true;
+  updateCounts();
+  autoGrow();
+});
+
 // ---------- Clear ----------
 clearBtn.addEventListener("click", () => {
   input.value = "";
+  if (previewMode) exitPreview(); // drop the rendered view before clearing
   inputFocused = false;
   input.blur(); // return to the paste-zone state
   updateCounts();
@@ -171,6 +235,7 @@ systemDark.addEventListener("change", () => {
 });
 
 // ---------- Init ----------
+renderPreviewBtn();
 updateCounts();
 autoGrow();
 renderIcon();

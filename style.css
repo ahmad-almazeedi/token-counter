@@ -56,7 +56,7 @@ body {
   max-width: 780px;
   display: flex;
   flex-direction: column;
-  gap: clamp(2rem, 5vw, 3.25rem);
+  gap: clamp(1.5rem, 4vw, 2.25rem);
 }
 
 /* ---------- Hero counter ---------- */
@@ -113,7 +113,6 @@ body {
 
 /* The whole empty box is the paste target; it overlays the textarea. */
 .paste-zone {
-  --paste-hover: color-mix(in srgb, var(--border) 60%, var(--text));
   position: absolute;
   inset: 0;
   display: flex;
@@ -123,14 +122,12 @@ body {
   gap: 1.1rem;
   border-radius: 28px;
   cursor: pointer;
-  transition: box-shadow 0.2s ease;
 }
 
-/* Hovering the box (paste area) glows and lightens the Paste hint. */
+/* Hovering the box (paste area) lightens the Paste hint. */
 .paste-zone:hover,
 .paste-zone:focus-visible {
   outline: none;
-  box-shadow: 0 0 14px 0 color-mix(in srgb, var(--paste-hover) 26%, transparent);
 }
 
 .paste-zone--hidden {
@@ -156,16 +153,136 @@ body {
   height: 22px;
 }
 
-/* ---------- Clear button ---------- */
-.clear-btn {
-  --clear-accent: color-mix(in srgb, var(--border) 55%, var(--text));
-  position: absolute;
-  top: calc(100% + 0.75rem);
-  right: 0;
+/* ---------- Markdown preview ---------- */
+/* Sits in the same box, replacing the textarea when preview mode is on. */
+.preview {
+  width: 100%;
+  min-height: clamp(180px, 30vh, 300px);
+  padding: clamp(1.1rem, 3vw, 1.6rem);
+  font-size: 1.075rem;
+  line-height: 1.6;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  overflow-wrap: break-word;
+}
+
+.preview--hidden {
+  display: none;
+}
+
+.preview > :first-child {
+  margin-top: 0;
+}
+.preview > :last-child {
+  margin-bottom: 0;
+}
+
+.preview h1,
+.preview h2,
+.preview h3,
+.preview h4,
+.preview h5,
+.preview h6 {
+  margin: 1.4em 0 0.55em;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+.preview h1 {
+  font-size: 1.7em;
+}
+.preview h2 {
+  font-size: 1.4em;
+}
+.preview h3 {
+  font-size: 1.2em;
+}
+.preview h4,
+.preview h5,
+.preview h6 {
+  font-size: 1.05em;
+}
+
+.preview p {
+  margin: 0.8em 0;
+}
+
+.preview ul,
+.preview ol {
+  margin: 0.8em 0;
+  padding-left: 1.4em;
+}
+.preview li {
+  margin: 0.3em 0;
+}
+
+.preview a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.preview a:hover {
+  text-decoration: underline;
+}
+
+.preview strong {
+  font-weight: 700;
+}
+
+.preview code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.88em;
+  background: color-mix(in srgb, var(--border) 45%, transparent);
+  padding: 0.15em 0.4em;
+  border-radius: 7px;
+}
+
+.preview pre {
+  margin: 0.9em 0;
+  padding: 1rem 1.15rem;
+  background: color-mix(in srgb, var(--border) 40%, transparent);
+  border-radius: 16px;
+  overflow-x: auto;
+}
+.preview pre code {
+  background: none;
+  padding: 0;
+}
+
+.preview blockquote {
+  margin: 0.9em 0;
+  padding: 0.2em 0 0.2em 1em;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+
+.preview hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.4em 0;
+}
+
+/* ---------- Action toolbar (its own row above the box, right-aligned) ---------- */
+.editor {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Height is reserved so the box doesn't shift when the buttons appear/disappear. */
+.box-tools {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.1rem;
+  margin-bottom: 0.7rem;
+}
+
+.pill-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.5rem 0.95rem 0.5rem 0.75rem;
+  padding: 0.45rem 0.9rem 0.45rem 0.75rem;
   border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--bg);
@@ -174,21 +291,27 @@ body {
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: color 0.2s ease, box-shadow 0.2s ease;
+  transition: color 0.2s ease;
 }
 
-.clear-btn:hover,
-.clear-btn:focus-visible {
+.pill-btn:hover,
+.pill-btn:focus-visible {
   outline: none;
   color: var(--text);
-  box-shadow: 0 0 12px 0 color-mix(in srgb, var(--clear-accent) 28%, transparent);
 }
 
-.clear-btn__icon {
+.pill-btn__icon {
   width: 17px;
   height: 17px;
+  display: block;
+}
+.pill-btn__icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
+.preview-btn--hidden,
 .clear-btn--hidden {
   display: none;
 }
@@ -205,18 +328,13 @@ body {
   border: 1px solid var(--border);
   border-radius: 50%;
   background: transparent;
-  color: var(--text);
+  color: var(--muted);
   cursor: pointer;
-  transition: transform 0.15s ease, border-color 0.2s ease;
+  transition: color 0.2s ease;
 }
 
 .theme-toggle:hover {
-  transform: translateY(-2px);
-  border-color: var(--accent);
-}
-
-.theme-toggle:active {
-  transform: translateY(0);
+  color: var(--text);
 }
 
 .theme-toggle:focus-visible {
