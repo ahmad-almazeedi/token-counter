@@ -26,16 +26,25 @@
   </button>
 
   <main class="app">
-    <section class="counter" aria-live="polite">
-      <div class="counter__value" id="charCount">0</div>
-      <div class="counter__label">characters</div>
-    </section>
-
     <div class="editor">
       <div class="box-tools">
+        <section class="stats" aria-live="polite">
+          <span class="stats__item"><span class="stats__value" id="charCount">0</span> characters</span>
+          <span class="stats__sep" aria-hidden="true">·</span>
+          <span class="stats__item"><span class="stats__value" id="wordCount">0</span> words</span>
+        </section>
+
         <button id="previewBtn" class="pill-btn preview-btn preview-btn--hidden" type="button" aria-label="View Markdown rendering">
           <span class="pill-btn__icon" aria-hidden="true"></span>
           <span class="pill-btn__label">Markdown</span>
+        </button>
+
+        <button id="replaceBtn" class="pill-btn replace-btn replace-btn--hidden" type="button" aria-label="Paste clipboard over the current text">
+          <svg class="pill-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="8" y="3" width="8" height="4" rx="1.5"></rect>
+            <path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"></path>
+          </svg>
+          <span>Paste &amp; Replace</span>
         </button>
 
         <button id="clearBtn" class="pill-btn clear-btn clear-btn--hidden" type="button" aria-label="Clear text">

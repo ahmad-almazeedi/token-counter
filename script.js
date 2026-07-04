@@ -1,10 +1,12 @@
 // ---------- Elements ----------
 const input = document.getElementById("input");
 const charCountEl = document.getElementById("charCount");
+const wordCountEl = document.getElementById("wordCount");
 const themeToggle = document.getElementById("themeToggle");
 const themeIcon = themeToggle.querySelector(".theme-toggle__icon");
 const pasteZone = document.getElementById("pasteZone");
 const clearBtn = document.getElementById("clearBtn");
+const replaceBtn = document.getElementById("replaceBtn");
 const preview = document.getElementById("preview");
 const previewBtn = document.getElementById("previewBtn");
 const previewIcon = previewBtn.querySelector(".pill-btn__icon");
@@ -16,6 +18,10 @@ const nf = new Intl.NumberFormat();
 let inputFocused = false;
 // Whether the box is currently showing rendered Markdown instead of the textarea.
 let previewMode = false;
+// Clipboard text as of the last time we legitimately saw it (a paste we ran,
+// a Cmd+V, or a copy/cut on this page). null = unknown. Used to hide
+// Paste & Replace when it would be a no-op.
+let knownClipboard = null;
 
 // ---------- Counting ----------
 // The paste zone covers the box only when it's empty AND not focused (no
@@ -25,6 +31,9 @@ function syncPasteZone() {
   const showZone = empty && !inputFocused;
   pasteZone.classList.toggle("paste-zone--hidden", !showZone);
   clearBtn.classList.toggle("clear-btn--hidden", empty);
+  // Hide Paste & Replace when the box is empty or replacing wouldn't change anything.
+  const replaceNoop = knownClipboard !== null && knownClipboard === input.value;
+  replaceBtn.classList.toggle("replace-btn--hidden", empty || replaceNoop);
   // Hide the typing placeholder while the paste zone covers the box.
   input.placeholder = showZone ? "" : "Type here";
 }
@@ -83,6 +92,8 @@ previewBtn.addEventListener("click", () => {
 
 function updateCounts() {
   charCountEl.textContent = nf.format(input.value.length);
+  const words = input.value.match(/\S+/g);
+  wordCountEl.textContent = nf.format(words ? words.length : 0);
   syncPasteZone();
   syncMarkdown();
   // Keep the live preview in sync if it's open while text changes programmatically.
@@ -132,6 +143,7 @@ async function doPaste() {
   } catch (e) {
     return; // dismissed or blocked — leave the paste zone untouched
   }
+  knownClipboard = text;
   if (text) {
     input.value = text;
     updateCounts();
@@ -143,6 +155,8 @@ async function doPaste() {
 }
 
 pasteZone.addEventListener("click", doPaste);
+// Paste & replace: overwrite the current text with the clipboard in one step.
+replaceBtn.addEventListener("click", doPaste);
 pasteZone.addEventListener("keydown", (e) => {
   if (e.key === "Enter" || e.key === " ") {
     e.preventDefault();
@@ -169,9 +183,15 @@ document.addEventListener("keydown", (e) => {
 // Cmd+V anywhere pastes into the box — the browser hands us the text directly
 // on a user-initiated paste, so no clipboard permission prompt is involved.
 document.addEventListener("paste", (e) => {
-  if (previewMode) return; // showing rendered Markdown, not editing
-  if (inputFocused) return; // native paste into the textarea handles it
   const text = e.clipboardData && e.clipboardData.getData("text/plain");
+  if (typeof text === "string") knownClipboard = text;
+  if (previewMode) return; // showing rendered Markdown, not editing
+  if (inputFocused) {
+    // Native paste into the textarea handles insertion; just refresh the
+    // Paste & Replace visibility once the value has updated.
+    setTimeout(syncPasteZone, 0);
+    return;
+  }
   if (!text) return;
   e.preventDefault();
   input.value += text;
@@ -180,6 +200,21 @@ document.addEventListener("paste", (e) => {
   updateCounts();
   autoGrow();
 });
+
+// Copy/cut on this page also changes the clipboard — keep our record current.
+function trackCopy(e) {
+  const sel =
+    e.target === input
+      ? input.value.slice(input.selectionStart, input.selectionEnd)
+      : String(window.getSelection());
+  if (sel) {
+    knownClipboard = sel;
+    // Defer so a cut's value change lands before we re-check visibility.
+    setTimeout(syncPasteZone, 0);
+  }
+}
+document.addEventListener("copy", trackCopy);
+document.addEventListener("cut", trackCopy);
 
 // ---------- Clear ----------
 clearBtn.addEventListener("click", () => {

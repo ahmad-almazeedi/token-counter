@@ -87,6 +87,47 @@
         continue;
       }
 
+      // Table: a header row followed by a delimiter row like | --- | :---: |
+      if (
+        /\|/.test(line) &&
+        i + 1 < lines.length &&
+        /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$/.test(lines[i + 1])
+      ) {
+        var splitRow = function (row) {
+          return row.replace(/^\s*\|/, "").replace(/\|\s*$/, "").split("|").map(function (c) {
+            return c.trim();
+          });
+        };
+        var headers = splitRow(line);
+        var aligns = splitRow(lines[i + 1]).map(function (d) {
+          var left = /^:/.test(d), right = /:$/.test(d);
+          if (left && right) return "center";
+          if (right) return "right";
+          if (left) return "left";
+          return "";
+        });
+        var cell = function (tag, content, col) {
+          var align = aligns[col] ? ' style="text-align:' + aligns[col] + '"' : "";
+          return "<" + tag + align + ">" + inline(escapeHtml(content)) + "</" + tag + ">";
+        };
+        var table = '<div class="table-wrap"><table><thead><tr>';
+        for (var c = 0; c < headers.length; c++) table += cell("th", headers[c], c);
+        table += "</tr></thead>";
+        i += 2;
+        var body = [];
+        while (i < lines.length && /\|/.test(lines[i]) && !/^\s*$/.test(lines[i])) {
+          var cells = splitRow(lines[i]);
+          var row = "<tr>";
+          for (var c2 = 0; c2 < headers.length; c2++) row += cell("td", cells[c2] || "", c2);
+          body.push(row + "</tr>");
+          i++;
+        }
+        if (body.length) table += "<tbody>" + body.join("") + "</tbody>";
+        table += "</table></div>";
+        out.push(table);
+        continue;
+      }
+
       // Unordered list
       if (/^\s*[-*+]\s+/.test(line)) {
         var uitems = [];
@@ -119,7 +160,12 @@
         !/^\s*>\s?/.test(lines[i]) &&
         !/^\s*[-*+]\s+/.test(lines[i]) &&
         !/^\s*\d+\.\s+/.test(lines[i]) &&
-        !/^\s*([-*_])(\s*\1){2,}\s*$/.test(lines[i])
+        !/^\s*([-*_])(\s*\1){2,}\s*$/.test(lines[i]) &&
+        !(
+          /\|/.test(lines[i]) &&
+          i + 1 < lines.length &&
+          /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$/.test(lines[i + 1])
+        )
       ) {
         para.push(lines[i]);
         i++;
@@ -143,7 +189,8 @@
       /^\s*[-*+]\s+\S/m,
       /^\s*\d+\.\s+\S/m,
       /\[[^\]\n]+\]\([^)\n]+\)/,
-      /^\s*([-*_])(\s*\1){2,}\s*$/m
+      /^\s*([-*_])(\s*\1){2,}\s*$/m,
+      /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|\s*:?-{3,}:?\s*\|?\s*$/m
     ];
     for (var k = 0; k < patterns.length; k++) {
       if (patterns[k].test(text)) return true;
