@@ -49,14 +49,14 @@ input.addEventListener("blur", () => {
 
 // ---------- Markdown preview ----------
 const PREVIEW_EYE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
-const PREVIEW_PENCIL = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`;
+const PREVIEW_EYE_OFF = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.6 5.1A10.9 10.9 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-2.3 3.2M6.2 6.2A17 17 0 0 0 2 12s3.5 7 10 7a10.7 10.7 0 0 0 5.8-1.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="M3 3l18 18"/></svg>`;
 
 function renderPreviewBtn() {
-  previewIcon.innerHTML = previewMode ? PREVIEW_PENCIL : PREVIEW_EYE;
-  previewLabel.textContent = previewMode ? "Edit" : "Markdown";
+  previewIcon.innerHTML = previewMode ? PREVIEW_EYE_OFF : PREVIEW_EYE;
+  previewLabel.textContent = previewMode ? "Markdown off" : "Markdown";
   previewBtn.setAttribute(
     "aria-label",
-    previewMode ? "Back to editing" : "View Markdown rendering"
+    previewMode ? "Turn off Markdown rendering" : "View Markdown rendering"
   );
 }
 
@@ -74,6 +74,8 @@ function enterPreview() {
   preview.classList.remove("preview--hidden");
   input.style.display = "none";
   renderPreviewBtn();
+  // Cap the preview at the same bottom limit the textarea grows to.
+  preview.style.maxHeight = availableHeight(preview) + "px";
 }
 
 function exitPreview() {
@@ -90,8 +92,18 @@ previewBtn.addEventListener("click", () => {
   else enterPreview();
 });
 
+// Clicking the rendered Markdown drops back to editing (links still work).
+preview.addEventListener("click", (e) => {
+  if (e.target.closest("a")) return;
+  exitPreview();
+  input.focus();
+  inputFocused = true;
+  syncPasteZone();
+});
+
 function updateCounts() {
-  charCountEl.textContent = nf.format(input.value.length);
+  // Ignore whitespace before the first and after the last real character.
+  charCountEl.textContent = nf.format(input.value.trim().length);
   const words = input.value.match(/\S+/g);
   wordCountEl.textContent = nf.format(words ? words.length : 0);
   syncPasteZone();
@@ -100,8 +112,16 @@ function updateCounts() {
   if (previewMode) preview.innerHTML = window.renderMarkdown(input.value);
 }
 
+// Room from an element's top down to the padded bottom of the viewport,
+// minus breathing space so the box stops a bit before the screen edge.
+function availableHeight(el) {
+  const docTop = el.getBoundingClientRect().top + window.scrollY;
+  const bottomGap = parseFloat(getComputedStyle(document.body).paddingBottom) || 24;
+  return Math.max(window.innerHeight - docTop - bottomGap - 56, 120);
+}
+
 // Grow the box downward to fit its content, but only until its bottom reaches
-// the padded bottom of the screen — past that, scroll inside the box instead.
+// the limit above — past that, scroll inside the box instead.
 function autoGrow() {
   if (previewMode) return; // textarea is hidden; nothing to size
   // Measure the full content height with the CSS min-height as the floor.
@@ -112,10 +132,7 @@ function autoGrow() {
     parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
   const needed = input.scrollHeight + borders;
 
-  // Space from the box's top down to the padded bottom of the viewport.
-  const docTop = input.getBoundingClientRect().top + window.scrollY;
-  const bottomGap = parseFloat(getComputedStyle(document.body).paddingBottom) || 24;
-  const maxHeight = Math.max(window.innerHeight - docTop - bottomGap, 120);
+  const maxHeight = availableHeight(input);
 
   if (needed > maxHeight) {
     input.style.minHeight = maxHeight + "px";
@@ -132,7 +149,10 @@ input.addEventListener("input", () => {
   autoGrow();
 });
 
-window.addEventListener("resize", autoGrow);
+window.addEventListener("resize", () => {
+  autoGrow();
+  if (previewMode) preview.style.maxHeight = availableHeight(preview) + "px";
+});
 
 // ---------- Paste / type ----------
 // The whole empty box pastes; the small "or type" link is the only way to type.
