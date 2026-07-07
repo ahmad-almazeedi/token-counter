@@ -1,7 +1,8 @@
 // ---------- Elements ----------
 const input = document.getElementById("input");
-const charCountEl = document.getElementById("charCount");
-const wordCountEl = document.getElementById("wordCount");
+const statsEl = document.getElementById("stats");
+const filterBtn = document.getElementById("filterBtn");
+const filterMenu = document.getElementById("filterMenu");
 const themeToggle = document.getElementById("themeToggle");
 const themeIcon = themeToggle.querySelector(".theme-toggle__icon");
 const pasteZone = document.getElementById("pasteZone");
@@ -36,6 +37,8 @@ function syncPasteZone() {
   replaceBtn.classList.toggle("replace-btn--hidden", empty || replaceNoop);
   // Hide the typing placeholder while the paste zone covers the box.
   input.placeholder = showZone ? "" : "Type here";
+  // Buttons appearing/disappearing changes the room left for the counters.
+  if (typeof fitStats === "function") fitStats();
 }
 
 input.addEventListener("focus", () => {
@@ -101,11 +104,164 @@ preview.addEventListener("click", (e) => {
   syncPasteZone();
 });
 
+// ---------- Stats (configurable via the filter dropdown) ----------
+const STATS = [
+  {
+    key: "characters",
+    label: "characters",
+    short: "chars",
+    // Ignore whitespace before the first and after the last real character.
+    count: (v) => v.trim().length,
+  },
+  {
+    key: "words",
+    label: "words",
+    count: (v) => {
+      const words = v.match(/\S+/g);
+      return words ? words.length : 0;
+    },
+  },
+  {
+    key: "lines",
+    label: "lines",
+    count: (v) => {
+      const t = v.trim();
+      return t ? t.split("\n").length : 0;
+    },
+  },
+  {
+    key: "paragraphs",
+    label: "paragraphs",
+    short: "paras",
+    // Blocks separated by one or more blank lines.
+    count: (v) => {
+      const t = v.trim();
+      return t ? t.split(/\n\s*\n/).length : 0;
+    },
+  },
+  {
+    key: "tokens",
+    label: "tokens (est.)",
+    short: "tokens",
+    menuLabel: "Tokens (est.)",
+    // Rough AI-tokenizer estimate for English-like text: ~4 characters or
+    // ~0.75 words per token — take the larger of the two guesses.
+    count: (v) => {
+      const chars = v.trim().length;
+      if (!chars) return 0;
+      const words = (v.match(/\S+/g) || []).length;
+      return Math.max(Math.ceil(chars / 4), Math.ceil(words / 0.75));
+    },
+  },
+];
+
+const DEFAULT_VISIBLE = ["characters", "words"];
+
+function visibleStats() {
+  try {
+    const raw = JSON.parse(localStorage.getItem("visibleStats"));
+    if (Array.isArray(raw)) {
+      return raw.filter((k) => STATS.some((s) => s.key === k));
+    }
+  } catch (e) {}
+  return DEFAULT_VISIBLE.slice();
+}
+
+function setVisibleStats(keys) {
+  try {
+    localStorage.setItem("visibleStats", JSON.stringify(keys));
+  } catch (e) {}
+}
+
+let statsHtmlFull = "";
+let statsHtmlShort = "";
+
+function renderStats() {
+  const visible = visibleStats();
+  const shown = STATS.filter((s) => visible.includes(s.key));
+  const build = (useShort) =>
+    shown
+      .map(
+        (s) =>
+          `<span class="stats__item"><span class="stats__value">${nf.format(
+            s.count(input.value)
+          )}</span> ${useShort ? s.short || s.label : s.label}</span>`
+      )
+      .join(`<span class="stats__sep" aria-hidden="true">·</span>`);
+  statsHtmlFull = build(false);
+  statsHtmlShort = build(true);
+  fitStats();
+}
+
+// Stats + visible buttons wider than the row? The row is right-aligned, so
+// overflow spills off the LEFT edge, which scrollWidth doesn't report —
+// sum the children's real widths instead.
+function rowOverflows(row) {
+  const gap = parseFloat(getComputedStyle(row).columnGap) || 0;
+  let total = 0;
+  let count = 0;
+  for (const child of row.children) {
+    if (getComputedStyle(child).display === "none") continue;
+    total += child.getBoundingClientRect().width;
+    count++;
+  }
+  total += gap * Math.max(0, count - 1);
+  return total > row.clientWidth + 1;
+}
+
+// Show full labels when they fit on the toolbar row; abbreviate if not.
+function fitStats() {
+  const row = statsEl.parentElement;
+  statsEl.innerHTML = statsHtmlFull;
+  if (rowOverflows(row)) {
+    statsEl.innerHTML = statsHtmlShort;
+  }
+}
+
+// Build the dropdown's checkboxes once.
+function buildFilterMenu() {
+  const visible = visibleStats();
+  filterMenu.innerHTML = STATS.map(
+    (s) => `<label class="filter-menu__item">
+      <input type="checkbox" value="${s.key}" ${visible.includes(s.key) ? "checked" : ""} />
+      <span>${s.menuLabel || s.label.charAt(0).toUpperCase() + s.label.slice(1)}</span>
+    </label>`
+  ).join("");
+}
+
+filterMenu.addEventListener("change", () => {
+  const keys = [...filterMenu.querySelectorAll("input:checked")].map(
+    (cb) => cb.value
+  );
+  setVisibleStats(keys);
+  renderStats();
+});
+
+function toggleFilterMenu(open) {
+  const show =
+    open !== undefined ? open : filterMenu.classList.contains("filter-menu--hidden");
+  filterMenu.classList.toggle("filter-menu--hidden", !show);
+  filterBtn.setAttribute("aria-expanded", String(show));
+}
+
+filterBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  toggleFilterMenu();
+});
+
+// Click anywhere else (or Escape) closes the dropdown.
+document.addEventListener("click", (e) => {
+  if (!filterMenu.classList.contains("filter-menu--hidden") &&
+      !e.target.closest(".stats-filter")) {
+    toggleFilterMenu(false);
+  }
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") toggleFilterMenu(false);
+});
+
 function updateCounts() {
-  // Ignore whitespace before the first and after the last real character.
-  charCountEl.textContent = nf.format(input.value.trim().length);
-  const words = input.value.match(/\S+/g);
-  wordCountEl.textContent = nf.format(words ? words.length : 0);
+  renderStats();
   syncPasteZone();
   syncMarkdown();
   // Keep the live preview in sync if it's open while text changes programmatically.
@@ -151,6 +307,7 @@ input.addEventListener("input", () => {
 
 window.addEventListener("resize", () => {
   autoGrow();
+  fitStats();
   if (previewMode) preview.style.maxHeight = availableHeight(preview) + "px";
 });
 
@@ -290,6 +447,7 @@ systemDark.addEventListener("change", () => {
 });
 
 // ---------- Init ----------
+buildFilterMenu();
 renderPreviewBtn();
 updateCounts();
 autoGrow();

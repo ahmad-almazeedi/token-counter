@@ -21,18 +21,27 @@
   </script>
 </head>
 <body>
-  <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch color theme">
-    <span class="theme-toggle__icon" aria-hidden="true"></span>
-  </button>
+  <div class="top-controls">
+    <div class="stats-filter">
+      <button id="filterBtn" class="round-btn" type="button" aria-label="Choose which counts to show" aria-haspopup="true" aria-expanded="false">
+        <span class="round-btn__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 5h18M6.5 12h11M10 19h4"></path>
+          </svg>
+        </span>
+      </button>
+      <div id="filterMenu" class="filter-menu filter-menu--hidden" role="group" aria-label="Counts to show"></div>
+    </div>
+
+    <button id="themeToggle" class="round-btn" type="button" aria-label="Switch color theme">
+      <span class="theme-toggle__icon round-btn__icon" aria-hidden="true"></span>
+    </button>
+  </div>
 
   <main class="app">
     <div class="editor">
       <div class="box-tools">
-        <section class="stats" aria-live="polite">
-          <span class="stats__item"><span class="stats__value" id="charCount">0</span> characters</span>
-          <span class="stats__sep" aria-hidden="true">·</span>
-          <span class="stats__item"><span class="stats__value" id="wordCount">0</span> words</span>
-        </section>
+        <section class="stats" id="stats" aria-live="polite"></section>
 
         <button id="previewBtn" class="pill-btn preview-btn preview-btn--hidden" type="button" aria-label="View Markdown rendering">
           <span class="pill-btn__icon" aria-hidden="true"></span>
@@ -44,7 +53,7 @@
             <rect x="8" y="3" width="8" height="4" rx="1.5"></rect>
             <path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"></path>
           </svg>
-          <span>Paste &amp; Replace</span>
+          <span>Paste</span>
         </button>
 
         <button id="clearBtn" class="pill-btn clear-btn clear-btn--hidden" type="button" aria-label="Clear text">

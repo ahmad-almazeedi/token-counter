@@ -317,6 +317,8 @@ body {
   font: inherit;
   font-weight: 600;
   font-size: 0.8rem;
+  white-space: nowrap;
+  flex-shrink: 0;
   cursor: pointer;
   transition: color 0.2s ease;
 }
@@ -344,42 +346,96 @@ body {
   display: none;
 }
 
-/* ---------- Theme toggle ---------- */
-.theme-toggle {
+/* ---------- Top-right controls (filter + theme toggle) ---------- */
+.top-controls {
   position: fixed;
   top: clamp(1rem, 3vw, 1.75rem);
   right: clamp(1rem, 3vw, 1.75rem);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.round-btn {
   width: 40px;
   height: 40px;
   display: grid;
   place-items: center;
   border: 1px solid var(--border);
   border-radius: 50%;
-  background: transparent;
+  background: var(--bg);
   color: var(--muted);
   cursor: pointer;
   transition: color 0.2s ease;
 }
 
-.theme-toggle:hover {
+.round-btn:hover {
   color: var(--text);
 }
 
-.theme-toggle:focus-visible {
+.round-btn:focus-visible {
   outline: none;
   border-color: var(--accent);
 }
 
-.theme-toggle__icon {
+.round-btn__icon {
   width: 18px;
   height: 18px;
   display: block;
 }
 
-.theme-toggle__icon svg {
+.round-btn__icon svg {
   width: 100%;
   height: 100%;
   display: block;
+}
+
+/* ---------- Stats filter dropdown ---------- */
+.stats-filter {
+  position: relative;
+}
+
+.filter-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  min-width: 10.5rem;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.filter-menu--hidden {
+  display: none;
+}
+
+.filter-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.filter-menu__item:hover {
+  background: color-mix(in srgb, var(--border) 35%, transparent);
+}
+
+.filter-menu__item input {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  cursor: pointer;
 }
 
 @media (prefers-reduced-motion: reduce) {
