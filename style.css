@@ -1,6 +1,7 @@
 /* ---------- Theme tokens ---------- */
 :root {
-  --bg: #f3f4f6;
+  --bg: #e4e4e7;
+  --surface: #f9f9fa;
   --text: #18181b;
   --muted: #71717a;
   --accent: #4f46e5;
@@ -11,7 +12,8 @@
 /* Follow the system setting unless the user has picked a theme manually */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
-    --bg: #0a0a0b;
+    --bg: #0e0e0f;
+    --surface: #1e1e1f;
     --text: #fafafa;
     --muted: #a1a1aa;
     --accent: #818cf8;
@@ -22,7 +24,8 @@
 
 /* Manual override (wins over the system preference above) */
 :root[data-theme="dark"] {
-  --bg: #0a0a0b;
+  --bg: #0e0e0f;
+  --surface: #1e1e1f;
   --text: #fafafa;
   --muted: #a1a1aa;
   --accent: #818cf8;
@@ -60,6 +63,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: clamp(1.5rem, 4vw, 2.25rem);
+  /* Auto margins center the editor in the space above the footer. */
+  margin: auto 0;
 }
 
 /* ---------- Stats bar ---------- */
@@ -87,20 +92,21 @@ body {
 .input {
   display: block;
   width: 100%;
-  min-height: clamp(180px, 30vh, 300px);
+  /* Fixed height — the box never grows; long text scrolls inside. */
+  height: clamp(320px, 50vh, 560px);
   resize: none;
-  overflow-y: hidden;
+  overflow-y: auto;
   padding: clamp(1.1rem, 3vw, 1.6rem);
   font: inherit;
   font-weight: 400;
   font-size: 0.95rem;
   line-height: 1.6;
   color: var(--text);
-  background: transparent;
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: none;
   border-radius: 28px;
   outline: none;
-  transition: border-color 0.2s ease, color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .input::placeholder {
@@ -159,12 +165,13 @@ body {
 /* Sits in the same box, replacing the textarea when preview mode is on. */
 .preview {
   width: 100%;
-  min-height: clamp(180px, 30vh, 300px);
+  height: clamp(320px, 50vh, 560px);
   padding: clamp(1.1rem, 3vw, 1.6rem);
   font-size: 0.95rem;
   line-height: 1.6;
   color: var(--text);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: none;
   border-radius: 28px;
   overflow-wrap: break-word;
   overflow-y: auto;
@@ -404,7 +411,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
-  background: var(--bg);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 16px;
 }
@@ -436,6 +443,38 @@ body {
   height: 15px;
   margin: 0;
   cursor: pointer;
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  margin-top: auto; /* stick to the bottom when the page is short */
+  padding-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.footer__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer__link:hover,
+.footer__link:focus-visible {
+  outline: none;
+  color: var(--text);
+}
+
+.footer__link {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-color: color-mix(in srgb, var(--muted) 45%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {

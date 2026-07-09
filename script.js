@@ -77,8 +77,6 @@ function enterPreview() {
   preview.classList.remove("preview--hidden");
   input.style.display = "none";
   renderPreviewBtn();
-  // Cap the preview at the same bottom limit the textarea grows to.
-  preview.style.maxHeight = availableHeight(preview) + "px";
 }
 
 function exitPreview() {
@@ -87,7 +85,6 @@ function exitPreview() {
   preview.innerHTML = "";
   input.style.display = "";
   renderPreviewBtn();
-  autoGrow();
 }
 
 previewBtn.addEventListener("click", () => {
@@ -268,48 +265,9 @@ function updateCounts() {
   if (previewMode) preview.innerHTML = window.renderMarkdown(input.value);
 }
 
-// Room from an element's top down to the padded bottom of the viewport,
-// minus breathing space so the box stops a bit before the screen edge.
-function availableHeight(el) {
-  const docTop = el.getBoundingClientRect().top + window.scrollY;
-  const bottomGap = parseFloat(getComputedStyle(document.body).paddingBottom) || 24;
-  return Math.max(window.innerHeight - docTop - bottomGap - 56, 120);
-}
+input.addEventListener("input", updateCounts);
 
-// Grow the box downward to fit its content, but only until its bottom reaches
-// the limit above — past that, scroll inside the box instead.
-function autoGrow() {
-  if (previewMode) return; // textarea is hidden; nothing to size
-  // Measure the full content height with the CSS min-height as the floor.
-  input.style.height = "auto";
-  input.style.minHeight = "";
-  const cs = getComputedStyle(input);
-  const borders =
-    parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
-  const needed = input.scrollHeight + borders;
-
-  const maxHeight = availableHeight(input);
-
-  if (needed > maxHeight) {
-    input.style.minHeight = maxHeight + "px";
-    input.style.height = maxHeight + "px";
-    input.style.overflowY = "auto";
-  } else {
-    input.style.height = needed + "px";
-    input.style.overflowY = "hidden";
-  }
-}
-
-input.addEventListener("input", () => {
-  updateCounts();
-  autoGrow();
-});
-
-window.addEventListener("resize", () => {
-  autoGrow();
-  fitStats();
-  if (previewMode) preview.style.maxHeight = availableHeight(preview) + "px";
-});
+window.addEventListener("resize", fitStats);
 
 // ---------- Paste / type ----------
 // The whole empty box pastes; the small "or type" link is the only way to type.
@@ -324,7 +282,6 @@ async function doPaste() {
   if (text) {
     input.value = text;
     updateCounts();
-    autoGrow();
   }
   input.focus();
   inputFocused = true;
@@ -354,7 +311,6 @@ document.addEventListener("keydown", (e) => {
   inputFocused = true;
   input.value += e.key;
   updateCounts();
-  autoGrow();
 });
 
 // Cmd+V anywhere pastes into the box — the browser hands us the text directly
@@ -375,7 +331,6 @@ document.addEventListener("paste", (e) => {
   input.focus();
   inputFocused = true;
   updateCounts();
-  autoGrow();
 });
 
 // Copy/cut on this page also changes the clipboard — keep our record current.
@@ -400,7 +355,6 @@ clearBtn.addEventListener("click", () => {
   inputFocused = false;
   input.blur(); // return to the paste-zone state
   updateCounts();
-  autoGrow();
 });
 
 // ---------- Theme ----------
@@ -450,5 +404,4 @@ systemDark.addEventListener("change", () => {
 buildFilterMenu();
 renderPreviewBtn();
 updateCounts();
-autoGrow();
 renderIcon();
