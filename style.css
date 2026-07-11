@@ -70,8 +70,9 @@ body {
   flex-direction: column;
   gap: clamp(1.5rem, 4vw, 2.25rem);
   /* Exact vertical center, raised by the footer's height (~1rem: one line
-     of 0.75rem text) so the fixed footer below doesn't make it feel low. */
-  transform: translateY(-1rem);
+     of 0.75rem text) plus a 2px nudge so the fixed footer below doesn't
+     make it feel low. */
+  transform: translateY(calc(-1rem - 2px));
 }
 
 /* ---------- Stats bar ---------- */
@@ -521,8 +522,8 @@ body {
 .footer {
   /* Out of the flow so it doesn't pull the editor off true vertical center. */
   position: fixed;
-  /* Original 1.1rem raised by exactly 10px. */
-  bottom: calc(1.1rem + 10px);
+  /* Original 1.1rem raised by exactly 12px. */
+  bottom: calc(1.1rem + 12px);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
