@@ -22,7 +22,7 @@
     --muted: #a1a1aa;
     --accent: #fafafa;
     --link: #fafafa;
-    --border: #333333;
+    --border: #2d2d2d;
     --muted-primary: rgba(255, 255, 255, 0.88);
   }
 }
@@ -36,7 +36,7 @@
   --muted: #a1a1aa;
   --accent: #fafafa;
   --link: #fafafa;
-  --border: #333333;
+  --border: #2d2d2d;
   --muted-primary: rgba(255, 255, 255, 0.88);
 }
 
@@ -120,7 +120,7 @@ body {
   font-variant-ligatures: none;
   color: var(--text);
   background: transparent;
-  border: 1.5px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: 28px;
   outline: none;
   transition: border-color 0.2s ease, color 0.3s ease;
@@ -189,7 +189,7 @@ body {
   line-height: 1.6;
   color: var(--text);
   background: transparent;
-  border: 1.5px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: 28px;
   overflow-wrap: break-word;
   overflow-y: auto;
@@ -298,7 +298,7 @@ body {
 .preview th,
 .preview td {
   padding: 0.45em 0.8em;
-  border: 1.5px solid var(--border);
+  border: 2px solid var(--border);
   text-align: left;
   white-space: nowrap;
 }
@@ -309,7 +309,7 @@ body {
 
 .preview hr {
   border: none;
-  border-top: 1.5px solid var(--border);
+  border-top: 2px solid var(--border);
   margin: 1.4em 0;
 }
 
@@ -335,7 +335,7 @@ body {
   gap: 0.4rem;
   height: 2.4rem;
   padding: 0 0.9rem 0 0.75rem;
-  border: 1.5px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: 999px;
   background: var(--bg);
   color: var(--muted-primary);
