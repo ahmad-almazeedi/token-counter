@@ -14,7 +14,7 @@ No build step, no dependencies — just `index.html`, `style.css`, and `script.j
 - 🌗 **Light / dark mode** that follows your system setting automatically, and remembers your choice if you toggle it manually
 - 🎨 Modern, minimal design with large, bold, rounded type and shapes
 
-Character counts are the raw text length — leading and trailing whitespace included, matching what character limits and form validators count. A separate **characters (trimmed)** stat is available in the filter menu.
+The default **characters** count is trimmed — leading and trailing whitespace excluded. If you're checking against a character limit or form validator, enable the **characters (raw)** stat in the filter menu; it counts the raw text length, whitespace and all.
 
 ## Roadmap
 

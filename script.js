@@ -187,10 +187,10 @@ const STATS = [
     short: "chars",
   },
   {
-    key: "charactersTrimmed",
-    label: "characters (trimmed)",
-    short: "trimmed",
-    menuLabel: "Characters (trimmed)",
+    key: "charactersRaw",
+    label: "characters (raw)",
+    short: "raw",
+    menuLabel: "Characters (raw)",
   },
   {
     key: "words",
@@ -305,18 +305,19 @@ function analyzeText(value) {
     trimmedNewlines = newlines;
   }
 
-  const charactersTrimmed =
+  const characters =
     firstNonWhitespace === -1 ? 0 : lastNonWhitespace - firstNonWhitespace + 1;
   // Whitespace stays in the Latin bucket: spaces mostly merge into
   // neighboring tokens, which the ~4 chars/token ratio already reflects.
   const latinChars = value.length - denseChars - mediumChars;
 
   return {
-    // Raw length, matching what character limits and form validators count.
-    characters: value.length,
-    charactersTrimmed,
+    // Trimmed length — leading/trailing whitespace excluded. The raw length
+    // (what character limits and form validators count) ships as charactersRaw.
+    characters,
+    charactersRaw: value.length,
     words,
-    lines: charactersTrimmed ? trimmedNewlines + 1 : 0,
+    lines: characters ? trimmedNewlines + 1 : 0,
     paragraphs,
     // Rough AI-tokenizer estimate, weighted by script density, with the
     // English ~0.75 words-per-token guess as a floor for Latin-like text.
@@ -415,12 +416,12 @@ let renderedStatsHtml = "";
 function renderStats(precomputedCounts = null) {
   const shown = STATS.filter((s) => selectedStatKeys.includes(s.key));
   const value = precomputedCounts ? null : input.value;
-  // A character-only display is just the raw length — no scan needed. Every
-  // other stat benefits from the shared pass.
+  // A character-only display can use the engine's optimized trim without
+  // walking the entire document. Every other stat benefits from the shared pass.
   const counts =
     precomputedCounts ||
     (shown.length === 1 && shown[0].key === "characters"
-      ? { characters: value.length }
+      ? { characters: value.trim().length }
       : shown.length
         ? analyzeText(value)
         : {});
