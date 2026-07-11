@@ -482,8 +482,9 @@ body {
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  /* --border is too faint against the menu surface for an empty box. */
-  border: 1.5px solid var(--muted);
+  /* Softened toward the background — full-strength muted/text read too
+     bright against the menu surface. */
+  border: 1.5px solid color-mix(in srgb, var(--muted) 70%, var(--bg));
   border-radius: 5px;
   transition: background-color 0.2s ease, border-color 0.2s ease;
 }
@@ -497,8 +498,8 @@ body {
 }
 
 .filter-menu__item input:checked ~ .filter-menu__check {
-  background: var(--text);
-  border-color: var(--text);
+  background: color-mix(in srgb, var(--text) 75%, var(--bg));
+  border-color: color-mix(in srgb, var(--text) 75%, var(--bg));
 }
 
 .filter-menu__item input:checked ~ .filter-menu__check svg {
