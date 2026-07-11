@@ -363,6 +363,13 @@ body {
   display: block;
 }
 
+/* The X glyph fills its (cropped) box edge-to-edge, so it renders a touch
+   smaller than the padded icons to sit at the same optical size. */
+.clear-btn .pill-btn__icon {
+  width: 13px;
+  height: 13px;
+}
+
 .preview-btn--hidden,
 .replace-btn--hidden,
 .clear-btn--hidden {

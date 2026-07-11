@@ -55,7 +55,9 @@
         </button>
 
         <button id="clearBtn" class="pill-btn clear-btn clear-btn--hidden" type="button" aria-label="Clear text">
-          <svg class="pill-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+          <!-- Cropped viewBox: the bare X has no built-in padding like the other
+               icons, so an uncropped 24-unit box reads as extra gap before the label. -->
+          <svg class="pill-btn__icon" viewBox="4 4 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
             <path d="M6 6l12 12M18 6L6 18"></path>
           </svg>
           <span>Clear</span>
