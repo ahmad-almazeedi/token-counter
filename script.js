@@ -468,8 +468,10 @@ function buildFilterMenu() {
   filterMenu.innerHTML = STATS.map(
     (s) => `<label class="filter-menu__item">
       <input type="checkbox" value="${s.key}" ${selectedStatKeys.includes(s.key) ? "checked" : ""} />
+      <span class="filter-menu__check" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg>
+      </span>
       <span class="filter-menu__label">${s.menuLabel || s.label.charAt(0).toUpperCase() + s.label.slice(1)}</span>
-      <span class="filter-menu__switch" aria-hidden="true"><span class="filter-menu__knob"></span></span>
     </label>`
   ).join("");
 }
