@@ -14,6 +14,17 @@ const previewIcon = previewBtn.querySelector(".pill-btn__icon");
 const previewLabel = previewBtn.querySelector(".pill-btn__label");
 
 const nf = new Intl.NumberFormat();
+const LARGE_TEXT_THRESHOLD = 100_000;
+const COUNT_UPDATE_DELAY = 250;
+const MARKDOWN_UPDATE_DELAY = 500;
+const WORKER_UPDATE_DELAY = 250;
+const TEXT_STORAGE_KEY = "editorText";
+const TEXT_SAVE_DELAY = 250;
+
+let inputRevision = 0;
+let textAnalysisWorker = null;
+let workerUpdateTimer = 0;
+let textSaveTimer = 0;
 
 // Tracked explicitly — document.activeElement is unreliable during the blur event.
 let inputFocused = false;
@@ -23,22 +34,51 @@ let previewMode = false;
 // a Cmd+V, or a copy/cut on this page). null = unknown. Used to hide
 // Paste & Replace when it would be a no-op.
 let knownClipboard = null;
+let clipboardMatchesInput = false;
+
+// ---------- Text persistence ----------
+function restoreText() {
+  try {
+    const storedText = localStorage.getItem(TEXT_STORAGE_KEY);
+    if (storedText !== null) input.value = storedText;
+  } catch (e) {}
+}
+
+function saveText() {
+  clearTimeout(textSaveTimer);
+  textSaveTimer = 0;
+
+  try {
+    if (input.value) localStorage.setItem(TEXT_STORAGE_KEY, input.value);
+    else localStorage.removeItem(TEXT_STORAGE_KEY);
+  } catch (e) {}
+}
+
+// Avoid copying a large document into localStorage on every keystroke. The
+// pending write is flushed on pagehide, so refreshing immediately after an
+// edit still saves the latest value.
+function scheduleTextSave() {
+  clearTimeout(textSaveTimer);
+  textSaveTimer = window.setTimeout(saveText, TEXT_SAVE_DELAY);
+}
+
+window.addEventListener("pagehide", () => {
+  if (textSaveTimer) saveText();
+});
 
 // ---------- Counting ----------
 // The paste zone covers the box only when it's empty AND not focused (no
 // blinking cursor). The clear button shows whenever there's text.
-function syncPasteZone() {
-  const empty = input.value.length === 0;
+function syncPasteZone(textLength = input.textLength) {
+  const empty = textLength === 0;
   const showZone = empty && !inputFocused;
   pasteZone.classList.toggle("paste-zone--hidden", !showZone);
   clearBtn.classList.toggle("clear-btn--hidden", empty);
   // Hide Paste & Replace when the box is empty or replacing wouldn't change anything.
-  const replaceNoop = knownClipboard !== null && knownClipboard === input.value;
+  const replaceNoop = knownClipboard !== null && clipboardMatchesInput;
   replaceBtn.classList.toggle("replace-btn--hidden", empty || replaceNoop);
   // Hide the typing placeholder while the paste zone covers the box.
   input.placeholder = showZone ? "" : "Type here";
-  // Buttons appearing/disappearing changes the room left for the counters.
-  if (typeof fitStats === "function") fitStats();
 }
 
 input.addEventListener("focus", () => {
@@ -48,6 +88,15 @@ input.addEventListener("focus", () => {
 input.addEventListener("blur", () => {
   inputFocused = false;
   syncPasteZone();
+});
+
+// When the window deactivates, the browser keeps the textarea as the element
+// to restore focus to on re-activation — so a click that merely brings the
+// window back would drop a typing cursor into the box before the click lands.
+// Release the focus for real: the empty box falls back to the paste zone and
+// the activating click pastes (or does nothing outside the box).
+window.addEventListener("blur", () => {
+  if (document.activeElement === input) input.blur();
 });
 
 // ---------- Markdown preview ----------
@@ -63,15 +112,44 @@ function renderPreviewBtn() {
   );
 }
 
-// Offer the preview button only when the text actually looks like Markdown.
-function syncMarkdown() {
-  const isMd = window.looksLikeMarkdown(input.value);
+function applyMarkdownState(isMd, value = null) {
   previewBtn.classList.toggle("preview-btn--hidden", !isMd);
   // If we were previewing and the text no longer looks like Markdown, drop back.
   if (!isMd && previewMode) exitPreview();
+  else if (previewMode) {
+    preview.innerHTML = window.renderMarkdown(value === null ? input.value : value);
+  }
+}
+
+// Offer the preview button only when the text actually looks like Markdown.
+function syncMarkdown() {
+  const value = input.value;
+  applyMarkdownState(window.looksLikeMarkdown(value), value);
+}
+
+let markdownUpdateTimer = 0;
+
+// Markdown detection runs several patterns over the whole value. For a large
+// document, wait until typing pauses so that work never sits in the keystroke's
+// critical path.
+function scheduleMarkdownUpdate(textLength) {
+  clearTimeout(markdownUpdateTimer);
+  markdownUpdateTimer = 0;
+
+  if (textLength <= LARGE_TEXT_THRESHOLD) {
+    syncMarkdown();
+    return;
+  }
+
+  markdownUpdateTimer = window.setTimeout(() => {
+    markdownUpdateTimer = 0;
+    syncMarkdown();
+  }, MARKDOWN_UPDATE_DELAY);
 }
 
 function enterPreview() {
+  clearTimeout(markdownUpdateTimer);
+  markdownUpdateTimer = 0;
   previewMode = true;
   preview.innerHTML = window.renderMarkdown(input.value);
   preview.classList.remove("preview--hidden");
@@ -107,52 +185,167 @@ const STATS = [
     key: "characters",
     label: "characters",
     short: "chars",
-    // Ignore whitespace before the first and after the last real character.
-    count: (v) => v.trim().length,
   },
   {
     key: "words",
     label: "words",
-    count: (v) => {
-      const words = v.match(/\S+/g);
-      return words ? words.length : 0;
-    },
   },
   {
     key: "lines",
     label: "lines",
-    count: (v) => {
-      const t = v.trim();
-      return t ? t.split("\n").length : 0;
-    },
   },
   {
     key: "paragraphs",
     label: "paragraphs",
     short: "paras",
-    // Blocks separated by one or more blank lines.
-    count: (v) => {
-      const t = v.trim();
-      return t ? t.split(/\n\s*\n/).length : 0;
-    },
   },
   {
     key: "tokens",
     label: "tokens (est.)",
     short: "tokens",
     menuLabel: "Tokens (est.)",
-    // Rough AI-tokenizer estimate for English-like text: ~4 characters or
-    // ~0.75 words per token — take the larger of the two guesses.
-    count: (v) => {
-      const chars = v.trim().length;
-      if (!chars) return 0;
-      const words = (v.match(/\S+/g) || []).length;
-      return Math.max(Math.ceil(chars / 4), Math.ceil(words / 0.75));
-    },
   },
 ];
 
-const DEFAULT_VISIBLE = ["characters", "words"];
+// Matches JavaScript's \s/trim whitespace set without running a regular
+// expression for every character.
+function isWhitespaceCodeUnit(code) {
+  return (
+    (code >= 0x0009 && code <= 0x000d) ||
+    code === 0x0020 ||
+    code === 0x00a0 ||
+    code === 0x1680 ||
+    (code >= 0x2000 && code <= 0x200a) ||
+    code === 0x2028 ||
+    code === 0x2029 ||
+    code === 0x202f ||
+    code === 0x205f ||
+    code === 0x3000 ||
+    code === 0xfeff
+  );
+}
+
+// Derive every count in one pass. The previous implementation scanned the
+// whole value once per stat, twice (for full and short labels), and retained
+// large arrays of every word/line/paragraph along the way.
+function analyzeText(value) {
+  let firstNonWhitespace = -1;
+  let lastNonWhitespace = -1;
+  let words = 0;
+  let newlines = 0;
+  let trimmedNewlines = 0;
+  let whitespaceNewlines = 0;
+  let paragraphs = 0;
+  let previousWasWhitespace = true;
+
+  for (let i = 0; i < value.length; i++) {
+    const code = value.charCodeAt(i);
+    const whitespace = isWhitespaceCodeUnit(code);
+
+    if (code === 0x000a && firstNonWhitespace !== -1) {
+      newlines++;
+      whitespaceNewlines++;
+    }
+
+    if (whitespace) {
+      previousWasWhitespace = true;
+      continue;
+    }
+
+    if (firstNonWhitespace === -1) {
+      firstNonWhitespace = i;
+      paragraphs = 1;
+    } else if (whitespaceNewlines >= 2) {
+      // Two newlines with only whitespace between them start a new block.
+      paragraphs++;
+    }
+
+    if (previousWasWhitespace) words++;
+
+    previousWasWhitespace = false;
+    whitespaceNewlines = 0;
+    lastNonWhitespace = i;
+    // Remember the count at the last real character so trailing newlines do
+    // not contribute, matching the original trim().split() behavior.
+    trimmedNewlines = newlines;
+  }
+
+  const characters =
+    firstNonWhitespace === -1 ? 0 : lastNonWhitespace - firstNonWhitespace + 1;
+
+  return {
+    characters,
+    words,
+    lines: characters ? trimmedNewlines + 1 : 0,
+    paragraphs,
+    // Rough AI-tokenizer estimate for English-like text: ~4 characters or
+    // ~0.75 words per token — take the larger of the two guesses.
+    tokens: characters
+      ? Math.max(Math.ceil(characters / 4), Math.ceil(words / 0.75))
+      : 0,
+  };
+}
+
+// Large documents are analyzed away from the UI thread. Building the worker
+// from the existing functions keeps this dependency-free and also works when
+// the site is opened without a build step.
+function createTextAnalysisWorker() {
+  if (!("Worker" in window) || !("Blob" in window) || !("URL" in window)) {
+    return null;
+  }
+
+  try {
+    const source = `
+      "use strict";
+      ${isWhitespaceCodeUnit.toString()}
+      ${analyzeText.toString()}
+      const looksLikeMarkdown = ${window.looksLikeMarkdown.toString()};
+
+      self.addEventListener("message", (event) => {
+        const { revision, value } = event.data;
+        self.postMessage({
+          revision,
+          counts: analyzeText(value),
+          isMarkdown: looksLikeMarkdown(value),
+        });
+      });
+    `;
+    const url = URL.createObjectURL(
+      new Blob([source], { type: "text/javascript" })
+    );
+    const worker = new Worker(url);
+    const releaseUrl = () => URL.revokeObjectURL(url);
+    worker.addEventListener("message", releaseUrl, { once: true });
+    worker.addEventListener("error", releaseUrl, { once: true });
+    return worker;
+  } catch (e) {
+    return null;
+  }
+}
+
+textAnalysisWorker = createTextAnalysisWorker();
+
+if (textAnalysisWorker) {
+  textAnalysisWorker.addEventListener("message", (event) => {
+    const { revision, counts, isMarkdown } = event.data;
+    if (revision !== inputRevision) return;
+    renderStats(counts);
+    applyMarkdownState(isMarkdown);
+  });
+
+  textAnalysisWorker.addEventListener("error", () => {
+    textAnalysisWorker.terminate();
+    textAnalysisWorker = null;
+
+    // Preserve behavior if workers are blocked by the page's environment.
+    if (input.textLength > LARGE_TEXT_THRESHOLD) {
+      scheduleStatsUpdate(input.textLength);
+      scheduleMarkdownUpdate(input.textLength);
+    }
+  });
+}
+
+const DEFAULT_VISIBLE = ["characters", "words", "tokens"];
 
 function visibleStats() {
   try {
@@ -170,57 +363,111 @@ function setVisibleStats(keys) {
   } catch (e) {}
 }
 
+let selectedStatKeys = visibleStats();
 let statsHtmlFull = "";
 let statsHtmlShort = "";
+let renderedStatsHtml = "";
 
-function renderStats() {
-  const visible = visibleStats();
-  const shown = STATS.filter((s) => visible.includes(s.key));
+function renderStats(precomputedCounts = null) {
+  const shown = STATS.filter((s) => selectedStatKeys.includes(s.key));
+  const value = precomputedCounts ? null : input.value;
+  // A character-only display can use the engine's optimized trim without
+  // walking the entire document. Every other stat benefits from the shared pass.
+  const counts =
+    precomputedCounts ||
+    (shown.length === 1 && shown[0].key === "characters"
+      ? { characters: value.trim().length }
+      : shown.length
+        ? analyzeText(value)
+        : {});
+  const formatted = shown.map((stat) => ({
+    stat,
+    value: nf.format(counts[stat.key]),
+  }));
   const build = (useShort) =>
-    shown
+    formatted
       .map(
-        (s) =>
-          `<span class="stats__item"><span class="stats__value">${nf.format(
-            s.count(input.value)
-          )}</span> ${useShort ? s.short || s.label : s.label}</span>`
+        ({ stat, value: count }) =>
+          `<span class="stats__item"><span class="stats__value">${count}</span> ${
+            useShort ? stat.short || stat.label : stat.label
+          }</span>`
       )
       .join(`<span class="stats__sep" aria-hidden="true">·</span>`);
-  statsHtmlFull = build(false);
-  statsHtmlShort = build(true);
+  const nextFull = build(false);
+  const nextShort = build(true);
+
+  // For example, typing inside a word does not change a words-only display.
+  // Avoid DOM work and forced layout when the rendered counters are unchanged.
+  if (nextFull === statsHtmlFull && nextShort === statsHtmlShort) return;
+
+  statsHtmlFull = nextFull;
+  statsHtmlShort = nextShort;
   fitStats();
 }
 
-// Stats + visible buttons wider than the row? The row is right-aligned, so
-// overflow spills off the LEFT edge, which scrollWidth doesn't report —
-// sum the children's real widths instead.
-function rowOverflows(row) {
-  const gap = parseFloat(getComputedStyle(row).columnGap) || 0;
-  let total = 0;
-  let count = 0;
-  for (const child of row.children) {
-    if (getComputedStyle(child).display === "none") continue;
-    total += child.getBoundingClientRect().width;
-    count++;
+// Show full labels when they fit on the stats row; abbreviate if not.
+function fitStats() {
+  if (renderedStatsHtml !== statsHtmlFull) {
+    statsEl.innerHTML = statsHtmlFull;
+    renderedStatsHtml = statsHtmlFull;
   }
-  total += gap * Math.max(0, count - 1);
-  return total > row.clientWidth + 1;
+  if (statsEl.scrollWidth > statsEl.clientWidth + 1) {
+    if (renderedStatsHtml !== statsHtmlShort) {
+      statsEl.innerHTML = statsHtmlShort;
+      renderedStatsHtml = statsHtmlShort;
+    }
+  }
 }
 
-// Show full labels when they fit on the toolbar row; abbreviate if not.
-function fitStats() {
-  const row = statsEl.parentElement;
-  statsEl.innerHTML = statsHtmlFull;
-  if (rowOverflows(row)) {
-    statsEl.innerHTML = statsHtmlShort;
+let statsUpdateTimer = 0;
+
+// Small values still update synchronously. With a large value, coalesce rapid
+// input and count after typing pauses so the textarea can paint first.
+function scheduleStatsUpdate(textLength) {
+  clearTimeout(statsUpdateTimer);
+  statsUpdateTimer = 0;
+
+  if (textLength <= LARGE_TEXT_THRESHOLD) {
+    renderStats();
+    return;
   }
+
+  statsUpdateTimer = window.setTimeout(() => {
+    statsUpdateTimer = 0;
+    renderStats();
+  }, COUNT_UPDATE_DELAY);
+}
+
+// Coalesce count and Markdown work into one worker message. Only the newest
+// revision is allowed to update the UI, so rapid edits cannot show stale data.
+function scheduleTextAnalysis(textLength) {
+  clearTimeout(workerUpdateTimer);
+  workerUpdateTimer = 0;
+
+  if (textLength > LARGE_TEXT_THRESHOLD && textAnalysisWorker) {
+    clearTimeout(statsUpdateTimer);
+    statsUpdateTimer = 0;
+    clearTimeout(markdownUpdateTimer);
+    markdownUpdateTimer = 0;
+
+    const revision = inputRevision;
+    workerUpdateTimer = window.setTimeout(() => {
+      workerUpdateTimer = 0;
+      if (revision !== inputRevision || !textAnalysisWorker) return;
+      textAnalysisWorker.postMessage({ revision, value: input.value });
+    }, WORKER_UPDATE_DELAY);
+    return;
+  }
+
+  scheduleStatsUpdate(textLength);
+  scheduleMarkdownUpdate(textLength);
 }
 
 // Build the dropdown's checkboxes once.
 function buildFilterMenu() {
-  const visible = visibleStats();
   filterMenu.innerHTML = STATS.map(
     (s) => `<label class="filter-menu__item">
-      <input type="checkbox" value="${s.key}" ${visible.includes(s.key) ? "checked" : ""} />
+      <input type="checkbox" value="${s.key}" ${selectedStatKeys.includes(s.key) ? "checked" : ""} />
       <span>${s.menuLabel || s.label.charAt(0).toUpperCase() + s.label.slice(1)}</span>
     </label>`
   ).join("");
@@ -230,8 +477,9 @@ filterMenu.addEventListener("change", () => {
   const keys = [...filterMenu.querySelectorAll("input:checked")].map(
     (cb) => cb.value
   );
+  selectedStatKeys = keys;
   setVisibleStats(keys);
-  renderStats();
+  scheduleTextAnalysis(input.textLength);
 });
 
 function toggleFilterMenu(open) {
@@ -257,20 +505,38 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") toggleFilterMenu(false);
 });
 
-function updateCounts() {
-  renderStats();
-  syncPasteZone();
-  syncMarkdown();
-  // Keep the live preview in sync if it's open while text changes programmatically.
-  if (previewMode) preview.innerHTML = window.renderMarkdown(input.value);
+function updateCounts({ persist = true } = {}) {
+  const textLength = input.textLength;
+  inputRevision++;
+  // Do not read the full textarea value in the keystroke handler. Large values
+  // are read only once, after editing pauses, when they are sent to the worker.
+  syncPasteZone(textLength);
+  scheduleTextAnalysis(textLength);
+  if (persist) scheduleTextSave();
 }
 
-input.addEventListener("input", updateCounts);
+input.addEventListener("input", () => {
+  clipboardMatchesInput = false;
+  updateCounts();
+  // The browser scrolls only far enough to keep the caret visible, leaving the
+  // last line flush with the bottom edge. When typing at the end, scroll fully
+  // down so the bottom padding shows as breathing room.
+  if (input.selectionEnd === input.textLength) {
+    input.scrollTop = input.scrollHeight;
+  }
+});
 
-window.addEventListener("resize", fitStats);
+let resizeFrame = 0;
+window.addEventListener("resize", () => {
+  if (resizeFrame) return;
+  resizeFrame = window.requestAnimationFrame(() => {
+    resizeFrame = 0;
+    fitStats();
+  });
+});
 
 // ---------- Paste / type ----------
-// The whole empty box pastes; the small "or type" link is the only way to type.
+// Clicking the empty box pastes; typing anywhere on the page starts typing.
 async function doPaste() {
   let text;
   try {
@@ -279,8 +545,10 @@ async function doPaste() {
     return; // dismissed or blocked — leave the paste zone untouched
   }
   knownClipboard = text;
+  clipboardMatchesInput = !text && input.textLength === 0;
   if (text) {
     input.value = text;
+    clipboardMatchesInput = true;
     updateCounts();
   }
   input.focus();
@@ -309,7 +577,9 @@ document.addEventListener("keydown", (e) => {
   e.preventDefault();
   input.focus();
   inputFocused = true;
-  input.value += e.key;
+  const end = input.textLength;
+  input.setRangeText(e.key, end, end, "end");
+  clipboardMatchesInput = false;
   updateCounts();
 });
 
@@ -317,17 +587,29 @@ document.addEventListener("keydown", (e) => {
 // on a user-initiated paste, so no clipboard permission prompt is involved.
 document.addEventListener("paste", (e) => {
   const text = e.clipboardData && e.clipboardData.getData("text/plain");
-  if (typeof text === "string") knownClipboard = text;
+  if (typeof text === "string") {
+    knownClipboard = text;
+    clipboardMatchesInput = false;
+  }
   if (previewMode) return; // showing rendered Markdown, not editing
   if (inputFocused) {
-    // Native paste into the textarea handles insertion; just refresh the
-    // Paste & Replace visibility once the value has updated.
-    setTimeout(syncPasteZone, 0);
+    // Native paste into the textarea handles insertion. Compare once after it
+    // lands; ordinary keystrokes never compare the full document.
+    setTimeout(() => {
+      clipboardMatchesInput =
+        knownClipboard !== null &&
+        knownClipboard.length === input.textLength &&
+        knownClipboard === input.value;
+      syncPasteZone();
+    }, 0);
     return;
   }
   if (!text) return;
   e.preventDefault();
-  input.value += text;
+  const wasEmpty = input.textLength === 0;
+  const end = input.textLength;
+  input.setRangeText(text, end, end, "end");
+  clipboardMatchesInput = wasEmpty;
   input.focus();
   inputFocused = true;
   updateCounts();
@@ -335,12 +617,19 @@ document.addEventListener("paste", (e) => {
 
 // Copy/cut on this page also changes the clipboard — keep our record current.
 function trackCopy(e) {
-  const sel =
-    e.target === input
-      ? input.value.slice(input.selectionStart, input.selectionEnd)
-      : String(window.getSelection());
+  const inputSelection = e.target === input;
+  const selectionStart = inputSelection ? input.selectionStart : 0;
+  const selectionEnd = inputSelection ? input.selectionEnd : 0;
+  const sel = inputSelection
+    ? input.value.slice(selectionStart, selectionEnd)
+    : String(window.getSelection());
   if (sel) {
     knownClipboard = sel;
+    clipboardMatchesInput =
+      e.type === "copy" &&
+      inputSelection &&
+      selectionStart === 0 &&
+      selectionEnd === input.textLength;
     // Defer so a cut's value change lands before we re-check visibility.
     setTimeout(syncPasteZone, 0);
   }
@@ -351,6 +640,7 @@ document.addEventListener("cut", trackCopy);
 // ---------- Clear ----------
 clearBtn.addEventListener("click", () => {
   input.value = "";
+  clipboardMatchesInput = knownClipboard === "";
   if (previewMode) exitPreview(); // drop the rendered view before clearing
   inputFocused = false;
   input.blur(); // return to the paste-zone state
@@ -401,7 +691,8 @@ systemDark.addEventListener("change", () => {
 });
 
 // ---------- Init ----------
+restoreText();
 buildFilterMenu();
 renderPreviewBtn();
-updateCounts();
+updateCounts({ persist: false });
 renderIcon();

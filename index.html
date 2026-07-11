@@ -41,19 +41,17 @@
   <main class="app">
     <div class="editor">
       <div class="box-tools">
-        <section class="stats" id="stats" aria-live="polite"></section>
-
         <button id="previewBtn" class="pill-btn preview-btn preview-btn--hidden" type="button" aria-label="View Markdown rendering">
           <span class="pill-btn__icon" aria-hidden="true"></span>
           <span class="pill-btn__label">Markdown</span>
         </button>
 
-        <button id="replaceBtn" class="pill-btn replace-btn replace-btn--hidden" type="button" aria-label="Paste clipboard over the current text">
+        <button id="replaceBtn" class="pill-btn replace-btn replace-btn--hidden" type="button" title="Replace text with clipboard" aria-label="Replace the current text with the clipboard">
           <svg class="pill-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="8" y="3" width="8" height="4" rx="1.5"></rect>
             <path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"></path>
           </svg>
-          <span>Paste</span>
+          <span>Replace</span>
         </button>
 
         <button id="clearBtn" class="pill-btn clear-btn clear-btn--hidden" type="button" aria-label="Clear text">
@@ -87,6 +85,8 @@
           </span>
         </div>
       </div>
+
+      <section class="stats" id="stats" aria-live="polite"></section>
     </div>
   </main>
 
