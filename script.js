@@ -191,6 +191,7 @@ const STATS = [
     label: "characters (raw)",
     short: "raw",
     menuLabel: "Characters (raw)",
+    menuHint: "Includes leading & trailing spaces",
   },
   {
     key: "words",
@@ -207,9 +208,8 @@ const STATS = [
   },
   {
     key: "tokens",
-    label: "tokens (est.)",
-    short: "tokens",
-    menuLabel: "Tokens (est.)",
+    label: "tokens",
+    menuHint: "Rough estimate — varies by model",
   },
 ];
 
@@ -513,7 +513,10 @@ function buildFilterMenu() {
   filterMenu.innerHTML = STATS.map(
     (s) => `<label class="filter-menu__item">
       <input type="checkbox" value="${s.key}" ${selectedStatKeys.includes(s.key) ? "checked" : ""} />
-      <span class="filter-menu__label">${s.menuLabel || s.label.charAt(0).toUpperCase() + s.label.slice(1)}</span>
+      <span class="filter-menu__text">
+        <span class="filter-menu__label">${s.menuLabel || s.label.charAt(0).toUpperCase() + s.label.slice(1)}</span>
+        ${s.menuHint ? `<span class="filter-menu__hint">${s.menuHint}</span>` : ""}
+      </span>
       <span class="filter-menu__check" aria-hidden="true">
         <svg class="filter-menu__check-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg>
         <svg class="filter-menu__check-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h12"></path></svg>

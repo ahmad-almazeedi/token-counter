@@ -7,7 +7,7 @@ No build step, no dependencies — just `index.html`, `style.css`, and `script.j
 ## Features
 
 - 📋 Paste or type text into a large, rounded canvas
-- 🔢 Live counts: **characters**, **words**, **lines**, **paragraphs**, and **tokens (est.)** — pick which ones to show from the filter menu
+- 🔢 Live counts: **characters**, **words**, **lines**, **paragraphs**, and **tokens** — pick which ones to show from the filter menu
 - 🧮 The token count is a fast heuristic, not a real tokenizer: ~4 characters per token for Latin text (with a word-based floor), with denser ratios for CJK and Arabic-script text. Expect it to be in the right ballpark, not exact.
 - 📝 Markdown detection with a one-click rendered preview
 - 💾 Your text sticks around across reloads (stored locally in your browser)
