@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="light dark" />
   <!-- Defense-in-depth CSP. Static site: only self scripts/styles, the hashed
        inline theme script, the data: favicon, and the blob: analysis worker. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-awjUEo2iga6r8HqKdI4p1upe99JFYEgBE8OxrNmNSeY=' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data:; worker-src blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-awjUEo2iga6r8HqKdI4p1upe99JFYEgBE8OxrNmNSeY=' blob: https://gc.zgo.at; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://ilostcount.goatcounter.com; worker-src blob:; connect-src 'self' https://ilostcount.goatcounter.com; object-src 'none'; base-uri 'none'; form-action 'none'" />
   <title>iLostCount: Token Counter</title>
   <meta name="description" content="A minimal canvas to paste text and instantly see its character, word, and estimated token counts. Free, fast, no tracking." />
   <link rel="canonical" href="https://ilostcount.com/" />
@@ -120,5 +120,7 @@
 
   <script src="markdown.js"></script>
   <script src="script.js"></script>
+  <!-- GoatCounter: cookieless page view counts, no personal data -->
+  <script data-goatcounter="https://ilostcount.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>
