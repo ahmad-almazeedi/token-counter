@@ -342,7 +342,7 @@ body {
   background: var(--bg);
   color: var(--muted-primary);
   font: inherit;
-  font-weight: 400;
+  font-weight: 500;
   font-size: 14px;
   white-space: nowrap;
   flex-shrink: 0;
