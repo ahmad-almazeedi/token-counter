@@ -86,11 +86,6 @@
       </div>
 
       <div class="box-tools">
-        <button id="previewBtn" class="pill-btn preview-btn preview-btn--hidden" type="button" aria-label="View Markdown rendering">
-          <span class="pill-btn__icon" aria-hidden="true"></span>
-          <span class="pill-btn__label">Markdown</span>
-        </button>
-
         <button id="clearBtn" class="pill-btn clear-btn clear-btn--hidden" type="button" aria-label="Clear text">
           <!-- Cropped viewBox: the bare X has no built-in padding like the other
                icons, so an uncropped 24-unit box reads as extra gap before the label. -->
@@ -98,6 +93,11 @@
             <path d="M6 6l12 12M18 6L6 18"></path>
           </svg>
           <span>Clear</span>
+        </button>
+
+        <button id="previewBtn" class="pill-btn preview-btn preview-btn--hidden" type="button" aria-label="View Markdown rendering">
+          <span class="pill-btn__icon" aria-hidden="true"></span>
+          <span class="pill-btn__label">Markdown</span>
         </button>
 
         <button id="replaceBtn" class="pill-btn replace-btn replace-btn--hidden" type="button" title="Replace text with clipboard" aria-label="Replace the current text with the clipboard">
