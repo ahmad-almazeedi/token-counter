@@ -366,9 +366,11 @@ body {
   display: block;
 }
 
-/* Text-only pill — even padding, no icon to compensate for. */
-.clear-btn {
-  padding: 0 0.9rem;
+/* The X glyph fills its (cropped) box edge-to-edge, so it renders a touch
+   smaller than the padded icons to sit at the same optical size. */
+.clear-btn .pill-btn__icon {
+  width: 11px;
+  height: 11px;
 }
 
 .preview-btn--hidden,
