@@ -514,7 +514,8 @@ body {
 .footer {
   /* Out of the flow so it doesn't pull the editor off true vertical center. */
   position: fixed;
-  bottom: 1.8rem;
+  /* Original 1.1rem raised by exactly 10px. */
+  bottom: calc(1.1rem + 10px);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
