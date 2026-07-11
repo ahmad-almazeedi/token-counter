@@ -39,4 +39,8 @@ Use the claude-in-chrome tools against http://localhost:1234/.
   when text present) and restore `visibleStats` when done, since this is the user's
   real browser profile.
 - Batched clicks occasionally don't land after menu/Escape interactions — verify
-  each state change via javascript_tool and re-click if needed.
+  each state change via javascript_tool and re-click if needed. The first click
+  right after a navigate/reload also tends to miss; retry it.
+- `python3 -m http.server` responses get heuristically cached: after editing CSS,
+  hard reload (cmd+shift+r) and confirm via getComputedStyle, or the old sheet
+  keeps rendering. `dev-server.mjs` (port 8080) sends no-store and live-reloads.

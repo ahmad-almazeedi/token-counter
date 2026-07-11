@@ -2,11 +2,11 @@
 :root {
   color-scheme: light;
   --bg: #fcfcfc;
-  --surface: #f4f4f5;
-  --text: #18181b;
-  --muted: #71717a;
-  --accent: #18181b;
-  --link: #18181b;
+  --surface: #f4f4f4;
+  --text: #181818;
+  --muted: #737373;
+  --accent: #181818;
+  --link: #181818;
   --border: #dcdcdc;
   /* Atmita monochrome text.mutedPrimary — button labels/icons. */
   --muted-primary: #1f1f1f;
@@ -19,7 +19,7 @@
     --bg: #000000;
     --surface: #1c1c1c;
     --text: #fafafa;
-    --muted: #a1a1aa;
+    --muted: #a3a3a3;
     --accent: #fafafa;
     --link: #fafafa;
     --border: #1e1e1e;
@@ -33,7 +33,7 @@
   --bg: #000000;
   --surface: #1c1c1c;
   --text: #fafafa;
-  --muted: #a1a1aa;
+  --muted: #a3a3a3;
   --accent: #fafafa;
   --link: #fafafa;
   --border: #1e1e1e;
