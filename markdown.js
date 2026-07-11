@@ -6,8 +6,15 @@
   // Marks extracted inline-code spans; a NUL byte never appears in real text.
   var SENTINEL = String.fromCharCode(0);
 
+  // Escape quotes too: rendered URLs/aligns land inside HTML attributes, so an
+  // unescaped " would break out of href="..." and inject attributes.
   function escapeHtml(s) {
-    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   // Apply inline formatting to a chunk of already-escaped text.
