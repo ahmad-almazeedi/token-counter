@@ -479,8 +479,8 @@ body {
 /* Bare glyph, native-menu style, trailing the label: a check on selected
    rows, a muted dash on unselected ones. Both occupy the same grid cell. */
 .filter-menu__check {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
   display: grid;
   place-items: center;
@@ -488,8 +488,8 @@ body {
 
 .filter-menu__check svg {
   grid-area: 1 / 1;
-  width: 13px;
-  height: 13px;
+  width: 17px;
+  height: 17px;
   display: block;
 }
 
