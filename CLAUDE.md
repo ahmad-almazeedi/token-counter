@@ -8,7 +8,7 @@ Always commit and push after every change.
 
 ## Design
 
-Grayscale only — never introduce any color/hue anywhere (no accents, no colored states, no tinted links). Everything stays in shades of gray, black, and white. Light mode background is pure white (#fff); dark mode background is pure black (#000).
+Grayscale only — never introduce any color/hue anywhere (no accents, no colored states, no tinted links). Everything stays in shades of gray, black, and white. Light mode background is #fcfcfc; dark mode background is pure black (#000).
 
 ## Dev server
 
