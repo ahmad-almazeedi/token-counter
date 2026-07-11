@@ -187,6 +187,12 @@ const STATS = [
     short: "chars",
   },
   {
+    key: "charactersTrimmed",
+    label: "characters (trimmed)",
+    short: "trimmed",
+    menuLabel: "Characters (trimmed)",
+  },
+  {
     key: "words",
     label: "words",
   },
@@ -225,6 +231,29 @@ function isWhitespaceCodeUnit(code) {
   );
 }
 
+// Rough chars-per-token density by script for the token estimate. Real
+// tokenizers vary per model; without one we at least avoid the worst-case
+// miss of applying the English ~4 chars/token ratio to scripts that tokenize
+// far denser (CJK ~1.5 chars/token, Arabic/Cyrillic/Indic/etc. ~2.5).
+function scriptTokenClass(code) {
+  if (
+    (code >= 0x2e80 && code <= 0x9fff) || // CJK ideographs, kana, radicals
+    (code >= 0xac00 && code <= 0xd7ff) || // Hangul syllables
+    (code >= 0xf900 && code <= 0xfaff) // CJK compatibility ideographs
+  ) {
+    return 2; // dense: ~1.5 chars/token
+  }
+  if (
+    (code >= 0x0370 && code <= 0x1fff) || // Greek, Cyrillic, Hebrew, Arabic, Indic, Thai, ...
+    (code >= 0xd800 && code <= 0xdfff) || // surrogate halves (astral chars: emoji, CJK ext.)
+    (code >= 0xfb50 && code <= 0xfdff) || // Arabic presentation forms A
+    (code >= 0xfe70 && code <= 0xfefe) // Arabic presentation forms B
+  ) {
+    return 1; // medium: ~2.5 chars/token
+  }
+  return 0; // Latin, digits, punctuation, whitespace: ~4 chars/token
+}
+
 // Derive every count in one pass. The previous implementation scanned the
 // whole value once per stat, twice (for full and short labels), and retained
 // large arrays of every word/line/paragraph along the way.
@@ -237,6 +266,8 @@ function analyzeText(value) {
   let whitespaceNewlines = 0;
   let paragraphs = 0;
   let previousWasWhitespace = true;
+  let denseChars = 0;
+  let mediumChars = 0;
 
   for (let i = 0; i < value.length; i++) {
     const code = value.charCodeAt(i);
@@ -251,6 +282,10 @@ function analyzeText(value) {
       previousWasWhitespace = true;
       continue;
     }
+
+    const scriptClass = scriptTokenClass(code);
+    if (scriptClass === 2) denseChars++;
+    else if (scriptClass === 1) mediumChars++;
 
     if (firstNonWhitespace === -1) {
       firstNonWhitespace = i;
@@ -270,18 +305,26 @@ function analyzeText(value) {
     trimmedNewlines = newlines;
   }
 
-  const characters =
+  const charactersTrimmed =
     firstNonWhitespace === -1 ? 0 : lastNonWhitespace - firstNonWhitespace + 1;
+  // Whitespace stays in the Latin bucket: spaces mostly merge into
+  // neighboring tokens, which the ~4 chars/token ratio already reflects.
+  const latinChars = value.length - denseChars - mediumChars;
 
   return {
-    characters,
+    // Raw length, matching what character limits and form validators count.
+    characters: value.length,
+    charactersTrimmed,
     words,
-    lines: characters ? trimmedNewlines + 1 : 0,
+    lines: charactersTrimmed ? trimmedNewlines + 1 : 0,
     paragraphs,
-    // Rough AI-tokenizer estimate for English-like text: ~4 characters or
-    // ~0.75 words per token — take the larger of the two guesses.
-    tokens: characters
-      ? Math.max(Math.ceil(characters / 4), Math.ceil(words / 0.75))
+    // Rough AI-tokenizer estimate, weighted by script density, with the
+    // English ~0.75 words-per-token guess as a floor for Latin-like text.
+    tokens: value.length
+      ? Math.max(
+          Math.ceil(latinChars / 4 + denseChars / 1.5 + mediumChars / 2.5),
+          Math.ceil(words / 0.75)
+        )
       : 0,
   };
 }
@@ -298,6 +341,7 @@ function createTextAnalysisWorker() {
     const source = `
       "use strict";
       ${isWhitespaceCodeUnit.toString()}
+      ${scriptTokenClass.toString()}
       ${analyzeText.toString()}
       const looksLikeMarkdown = ${window.looksLikeMarkdown.toString()};
 
@@ -371,12 +415,12 @@ let renderedStatsHtml = "";
 function renderStats(precomputedCounts = null) {
   const shown = STATS.filter((s) => selectedStatKeys.includes(s.key));
   const value = precomputedCounts ? null : input.value;
-  // A character-only display can use the engine's optimized trim without
-  // walking the entire document. Every other stat benefits from the shared pass.
+  // A character-only display is just the raw length — no scan needed. Every
+  // other stat benefits from the shared pass.
   const counts =
     precomputedCounts ||
     (shown.length === 1 && shown[0].key === "characters"
-      ? { characters: value.trim().length }
+      ? { characters: value.length }
       : shown.length
         ? analyzeText(value)
         : {});
