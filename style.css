@@ -75,12 +75,12 @@ body {
 }
 
 /* ---------- Stats bar ---------- */
-/* Sits under the box; left edge lines up with the text inside the box
+/* Sits above the box; left edge lines up with the text inside the box
    (same inset as the textarea's padding). Height is reserved so the
    layout doesn't shift when counts appear/disappear. */
 .stats {
   padding-left: clamp(1.1rem, 3vw, 1.6rem);
-  padding-top: 1.5rem;
+  margin-bottom: 0.85rem;
   min-height: 1.6rem;
   white-space: nowrap;
   display: flex;
@@ -102,9 +102,9 @@ body {
   display: block;
   width: 100%;
   /* Fixed height — the box never grows; long text scrolls inside.
-     Holds 450px until the viewport can't fit the box plus the surrounding
+     Holds 380px until the viewport can't fit the box plus the surrounding
      chrome (~260px of toolbar/stats/padding), then shrinks. */
-  height: clamp(260px, 100dvh - 260px, 450px);
+  height: clamp(240px, 100dvh - 260px, 380px);
   resize: none;
   overflow-y: auto;
   /* Uniform inset; the input handler scrolls fully down when typing at the
@@ -183,7 +183,7 @@ body {
 /* Sits in the same box, replacing the textarea when preview mode is on. */
 .preview {
   width: 100%;
-  height: clamp(260px, 100dvh - 260px, 450px);
+  height: clamp(240px, 100dvh - 260px, 380px);
   padding: clamp(1.1rem, 3vw, 1.6rem);
   /* Matches the textarea so the text doesn't resize when toggling preview. */
   font-size: 16px;
@@ -314,20 +314,21 @@ body {
   margin: 1.4em 0;
 }
 
-/* ---------- Action toolbar (its own row above the box, right-aligned) ---------- */
+/* ---------- Action toolbar (its own row under the box, left-aligned) ---------- */
 .editor {
   display: flex;
   flex-direction: column;
 }
 
-/* Height is reserved so the box doesn't shift when the buttons appear/disappear. */
+/* Sits under the box, flush with the container's left edge. Height is
+   reserved so the box doesn't shift when the buttons appear/disappear. */
 .box-tools {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   align-items: center;
   gap: 0.5rem;
   min-height: 2.4rem;
-  margin-bottom: 0.85rem;
+  margin-top: 1rem;
 }
 
 .pill-btn {
@@ -365,11 +366,9 @@ body {
   display: block;
 }
 
-/* The X glyph fills its (cropped) box edge-to-edge, so it renders a touch
-   smaller than the padded icons to sit at the same optical size. */
-.clear-btn .pill-btn__icon {
-  width: 11px;
-  height: 11px;
+/* Text-only pill — even padding, no icon to compensate for. */
+.clear-btn {
+  padding: 0 0.9rem;
 }
 
 .preview-btn--hidden,
