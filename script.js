@@ -209,7 +209,7 @@ const STATS = [
   {
     key: "tokens",
     label: "tokens",
-    menuHint: "Rough estimate — varies by model",
+    menuHint: "Rough estimate, varies by model",
   },
 ];
 
