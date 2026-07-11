@@ -468,7 +468,8 @@ function buildFilterMenu() {
   filterMenu.innerHTML = STATS.map(
     (s) => `<label class="filter-menu__item">
       <input type="checkbox" value="${s.key}" ${selectedStatKeys.includes(s.key) ? "checked" : ""} />
-      <span>${s.menuLabel || s.label.charAt(0).toUpperCase() + s.label.slice(1)}</span>
+      <span class="filter-menu__label">${s.menuLabel || s.label.charAt(0).toUpperCase() + s.label.slice(1)}</span>
+      <span class="filter-menu__switch" aria-hidden="true"><span class="filter-menu__knob"></span></span>
     </label>`
   ).join("");
 }
