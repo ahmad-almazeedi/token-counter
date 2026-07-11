@@ -493,13 +493,13 @@ body {
   width: 12px;
   height: 12px;
   display: block;
-  color: var(--bg);
+  color: var(--text);
   opacity: 0;
 }
 
+/* No fill — the check mark itself is the checked signal. */
 .filter-menu__item input:checked ~ .filter-menu__check {
-  background: color-mix(in srgb, var(--text) 75%, var(--bg));
-  border-color: color-mix(in srgb, var(--text) 75%, var(--bg));
+  border-color: var(--text);
 }
 
 .filter-menu__item input:checked ~ .filter-menu__check svg {
