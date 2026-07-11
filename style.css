@@ -476,8 +476,8 @@ body {
   pointer-events: none;
 }
 
-/* Bare check mark, native-menu style: the slot is always reserved so
-   labels stay aligned; the mark only shows on selected rows. */
+/* Bare glyph, native-menu style, trailing the label: a check on selected
+   rows, a muted dash on unselected ones. Both occupy the same grid cell. */
 .filter-menu__check {
   width: 16px;
   height: 16px;
@@ -487,15 +487,28 @@ body {
 }
 
 .filter-menu__check svg {
+  grid-area: 1 / 1;
   width: 13px;
   height: 13px;
   display: block;
+}
+
+.filter-menu__check-on {
   color: var(--text);
   opacity: 0;
 }
 
-.filter-menu__item input:checked ~ .filter-menu__check svg {
+.filter-menu__check-off {
+  color: var(--muted);
   opacity: 1;
+}
+
+.filter-menu__item input:checked ~ .filter-menu__check .filter-menu__check-on {
+  opacity: 1;
+}
+
+.filter-menu__item input:checked ~ .filter-menu__check .filter-menu__check-off {
+  opacity: 0;
 }
 
 .filter-menu__item input:focus-visible ~ .filter-menu__check {
