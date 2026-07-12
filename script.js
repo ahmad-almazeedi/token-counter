@@ -507,7 +507,7 @@ function renderStats(precomputedCounts = null) {
             useShort ? stat.short || stat.label : stat.label
           }</span>`
       )
-      .join(`<span class="stats__sep" aria-hidden="true">·</span>`);
+      .join("");
   const nextFull = build(false);
   const nextShort = build(true);
 
