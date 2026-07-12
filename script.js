@@ -12,6 +12,8 @@ const preview = document.getElementById("preview");
 const previewBtn = document.getElementById("previewBtn");
 const previewIcon = previewBtn.querySelector(".pill-btn__icon");
 const previewLabel = previewBtn.querySelector(".pill-btn__label");
+const box = document.querySelector(".box");
+const resizeHandle = document.getElementById("resizeHandle");
 
 const nf = new Intl.NumberFormat();
 const LARGE_TEXT_THRESHOLD = 100_000;
@@ -20,6 +22,8 @@ const MARKDOWN_UPDATE_DELAY = 500;
 const WORKER_UPDATE_DELAY = 250;
 const TEXT_STORAGE_KEY = "editorText";
 const TEXT_SAVE_DELAY = 250;
+const EDITOR_HEIGHT_STORAGE_KEY = "editorHeight";
+const MIN_EDITOR_HEIGHT = 240;
 
 let inputRevision = 0;
 let textAnalysisWorker = null;
@@ -35,6 +39,72 @@ let previewMode = false;
 // Paste & Replace when it would be a no-op.
 let knownClipboard = null;
 let clipboardMatchesInput = false;
+
+// ---------- Canvas height ----------
+function setEditorHeight(height, persist = false) {
+  const nextHeight = Math.max(MIN_EDITOR_HEIGHT, Math.round(height));
+  box.style.height = `${nextHeight}px`;
+  resizeHandle.setAttribute("aria-valuenow", String(nextHeight));
+
+  if (persist) {
+    try {
+      localStorage.setItem(EDITOR_HEIGHT_STORAGE_KEY, String(nextHeight));
+    } catch (e) {}
+  }
+}
+
+function restoreEditorHeight() {
+  try {
+    const storedHeight = Number(localStorage.getItem(EDITOR_HEIGHT_STORAGE_KEY));
+    if (Number.isFinite(storedHeight) && storedHeight >= MIN_EDITOR_HEIGHT) {
+      setEditorHeight(storedHeight);
+      return;
+    }
+  } catch (e) {}
+
+  resizeHandle.setAttribute(
+    "aria-valuenow",
+    String(Math.round(box.getBoundingClientRect().height))
+  );
+}
+
+let resizeState = null;
+
+resizeHandle.addEventListener("pointerdown", (e) => {
+  if (e.button !== 0) return;
+  e.preventDefault();
+  e.stopPropagation();
+  resizeState = {
+    pointerId: e.pointerId,
+    startY: e.clientY,
+    startHeight: box.getBoundingClientRect().height,
+  };
+  resizeHandle.setPointerCapture(e.pointerId);
+  resizeHandle.classList.add("resize-handle--active");
+});
+
+resizeHandle.addEventListener("pointermove", (e) => {
+  if (!resizeState || e.pointerId !== resizeState.pointerId) return;
+  setEditorHeight(resizeState.startHeight + e.clientY - resizeState.startY);
+});
+
+function finishResize(e) {
+  if (!resizeState || e.pointerId !== resizeState.pointerId) return;
+  resizeState = null;
+  resizeHandle.classList.remove("resize-handle--active");
+  setEditorHeight(box.getBoundingClientRect().height, true);
+}
+
+resizeHandle.addEventListener("pointerup", finishResize);
+resizeHandle.addEventListener("pointercancel", finishResize);
+
+resizeHandle.addEventListener("keydown", (e) => {
+  if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+  e.preventDefault();
+  const direction = e.key === "ArrowDown" ? 1 : -1;
+  const step = e.shiftKey ? 64 : 16;
+  setEditorHeight(box.getBoundingClientRect().height + direction * step, true);
+});
 
 // ---------- Text persistence ----------
 function restoreText() {
@@ -450,17 +520,24 @@ function renderStats(precomputedCounts = null) {
   fitStats();
 }
 
-// Show full labels when they fit on the stats row; abbreviate if not.
+// Show full labels when they fit on the stats row; abbreviate if not, then
+// step the row's size down when even short labels overflow.
+const STATS_SHRINK_STEPS = [0.9, 0.8, 0.7];
+
 function fitStats() {
+  statsEl.style.removeProperty("--stats-scale");
   if (renderedStatsHtml !== statsHtmlFull) {
     statsEl.innerHTML = statsHtmlFull;
     renderedStatsHtml = statsHtmlFull;
   }
-  if (statsEl.scrollWidth > statsEl.clientWidth + 1) {
-    if (renderedStatsHtml !== statsHtmlShort) {
-      statsEl.innerHTML = statsHtmlShort;
-      renderedStatsHtml = statsHtmlShort;
-    }
+  if (statsEl.scrollWidth <= statsEl.clientWidth + 1) return;
+  if (renderedStatsHtml !== statsHtmlShort) {
+    statsEl.innerHTML = statsHtmlShort;
+    renderedStatsHtml = statsHtmlShort;
+  }
+  for (const scale of STATS_SHRINK_STEPS) {
+    if (statsEl.scrollWidth <= statsEl.clientWidth + 1) return;
+    statsEl.style.setProperty("--stats-scale", String(scale));
   }
 }
 
@@ -743,6 +820,7 @@ systemDark.addEventListener("change", () => {
 });
 
 // ---------- Init ----------
+restoreEditorHeight();
 restoreText();
 buildFilterMenu();
 renderPreviewBtn();

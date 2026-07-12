@@ -80,20 +80,24 @@ body {
    (same inset as the textarea's padding). Height is reserved so the
    layout doesn't shift when counts appear/disappear. */
 .stats {
+  /* --stats-scale is stepped down by fitStats() when the row gets crowded. */
   padding-left: clamp(1.1rem, 3vw, 1.6rem);
   margin-bottom: 0.85rem;
-  min-height: 1.6rem;
+  min-height: 2.1rem;
   white-space: nowrap;
   display: flex;
   align-items: baseline;
-  gap: 0.6rem;
-  font-size: 1rem;
+  gap: calc(1.15rem * var(--stats-scale, 1));
+  font-size: calc(1rem * var(--stats-scale, 1));
   font-weight: 400;
+  line-height: 1.3;
   color: var(--muted);
   letter-spacing: 0.02em;
 }
 
 .stats__value {
+  font-size: 1.55em;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--text);
 }
@@ -102,10 +106,7 @@ body {
 .input {
   display: block;
   width: 100%;
-  /* Fixed height — the box never grows; long text scrolls inside.
-     Holds 380px until the viewport can't fit the box plus the surrounding
-     chrome (~260px of toolbar/stats/padding), then shrinks. */
-  height: clamp(240px, 100dvh - 260px, 380px);
+  height: 100%;
   resize: none;
   overflow-y: auto;
   /* Uniform inset; the input handler scrolls fully down when typing at the
@@ -135,6 +136,46 @@ body {
 /* ---------- Paste zone (empty state) ---------- */
 .box {
   position: relative;
+  /* Responsive until the user chooses a height with the resize handle. */
+  height: clamp(240px, 100dvh - 260px, 380px);
+  min-height: 240px;
+}
+
+/* A dedicated handle keeps resizing available in the empty and Markdown
+   states too. It sits over the canvas border without affecting its layout. */
+.resize-handle {
+  position: absolute;
+  z-index: 2;
+  bottom: 2px;
+  left: 50%;
+  width: 52px;
+  height: 16px;
+  transform: translateX(-50%);
+  display: grid;
+  place-items: center;
+  cursor: ns-resize;
+  touch-action: none;
+  border-radius: 999px;
+}
+
+.resize-handle::after {
+  content: "";
+  width: 28px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--border);
+  transition: background-color 0.2s ease;
+}
+
+.resize-handle:hover::after,
+.resize-handle:focus-visible::after,
+.resize-handle--active::after {
+  background: var(--muted);
+}
+
+.resize-handle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* The whole empty box is the paste target; it overlays the textarea. */
@@ -184,7 +225,7 @@ body {
 /* Sits in the same box, replacing the textarea when preview mode is on. */
 .preview {
   width: 100%;
-  height: clamp(240px, 100dvh - 260px, 380px);
+  height: 100%;
   padding: clamp(1.1rem, 3vw, 1.6rem);
   /* Matches the textarea so the text doesn't resize when toggling preview. */
   font-size: 16px;

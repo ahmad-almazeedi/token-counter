@@ -11,6 +11,7 @@ No build step, no dependencies: just `index.html`, `style.css`, and `script.js`.
 - 🧮 The token count is a fast heuristic, not a real tokenizer: ~4 characters per token for Latin text (with a word-based floor), with denser ratios for CJK and Arabic-script text. Expect it to be in the right ballpark, not exact.
 - 📝 Markdown detection with a one-click rendered preview
 - 💾 Your text sticks around across reloads (stored locally in your browser)
+- ↕️ Drag the canvas edge to adjust its height; your preferred size is remembered too
 - 🌗 **Light / dark mode** that follows your system setting automatically, and remembers your choice if you toggle it manually
 - 🎨 Modern, minimal design with large, bold, rounded type and shapes
 
