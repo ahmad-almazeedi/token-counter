@@ -87,7 +87,7 @@ body {
   white-space: nowrap;
   display: flex;
   align-items: baseline;
-  gap: calc(1.55rem * var(--stats-scale, 1));
+  gap: calc((1.55rem + 2px) * var(--stats-scale, 1));
   font-size: calc(1rem * var(--stats-scale, 1));
   font-weight: 500;
   line-height: 1.3;
