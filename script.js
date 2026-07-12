@@ -85,6 +85,12 @@ resizeHandle.addEventListener("pointerdown", (e) => {
 
 resizeHandle.addEventListener("pointermove", (e) => {
   if (!resizeState || e.pointerId !== resizeState.pointerId) return;
+  // The press may have ended without us seeing pointerup (released outside
+  // the window, capture lost). Don't let a hover keep resizing.
+  if (e.pointerType === "mouse" && !(e.buttons & 1)) {
+    finishResize(e);
+    return;
+  }
   setEditorHeight(resizeState.startHeight + e.clientY - resizeState.startY);
 });
 
@@ -97,6 +103,19 @@ function finishResize(e) {
 
 resizeHandle.addEventListener("pointerup", finishResize);
 resizeHandle.addEventListener("pointercancel", finishResize);
+resizeHandle.addEventListener("lostpointercapture", finishResize);
+
+// Double-click resets to the responsive default height from the stylesheet.
+resizeHandle.addEventListener("dblclick", () => {
+  box.style.height = "";
+  try {
+    localStorage.removeItem(EDITOR_HEIGHT_STORAGE_KEY);
+  } catch (e) {}
+  resizeHandle.setAttribute(
+    "aria-valuenow",
+    String(Math.round(box.getBoundingClientRect().height))
+  );
+});
 
 resizeHandle.addEventListener("keydown", (e) => {
   if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;

@@ -146,34 +146,34 @@ body {
 /* A dedicated handle keeps resizing available in the empty and Markdown
    states too. It sits over the canvas border without affecting its layout. */
 .resize-handle {
+  --grip: var(--border);
   position: absolute;
   z-index: 2;
-  bottom: 2px;
-  left: 50%;
-  width: 52px;
-  height: 16px;
-  transform: translateX(-50%);
+  /* Tucked into the bottom-right corner, inside the border's 28px curve. */
+  right: 7px;
+  bottom: 7px;
+  width: 26px;
+  height: 26px;
   display: grid;
   place-items: center;
   cursor: ns-resize;
   touch-action: none;
-  border-radius: 999px;
+  border-radius: 8px;
 }
 
 .resize-handle::after {
   content: "";
-  width: 28px;
-  height: 2px;
-  border-radius: 999px;
-  background: var(--border);
-  transition: background-color 0.2s ease;
+  width: 12px;
+  height: 12px;
+  /* Classic corner grip: diagonal lines clipped to a triangle. */
+  background: repeating-linear-gradient(
+    135deg,
+    var(--grip) 0 1.5px,
+    transparent 1.5px 5px
+  );
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
 }
 
-.resize-handle:hover::after,
-.resize-handle:focus-visible::after,
-.resize-handle--active::after {
-  background: var(--muted);
-}
 
 .resize-handle:focus-visible {
   outline: 2px solid var(--accent);
