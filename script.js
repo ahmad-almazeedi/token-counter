@@ -301,27 +301,45 @@ function isWhitespaceCodeUnit(code) {
   );
 }
 
-// Rough chars-per-token density by script for the token estimate. Real
-// tokenizers vary per model; without one we at least avoid the worst-case
-// miss of applying the English ~4 chars/token ratio to scripts that tokenize
-// far denser (CJK ~1.5 chars/token, Arabic/Cyrillic/Indic/etc. ~2.5).
-function scriptTokenClass(code) {
+// Rough per-code-unit token cost (1 / chars-per-token) by script for the
+// token estimate. Real tokenizers vary per model; the buckets track measured
+// densities: English letters ~4 chars/token, digits ~3 (numbers chunk into
+// few-digit tokens), ASCII punctuation ~1.5 (JSON/CSV/code fragment heavily),
+// CJK ~1.5, Arabic/Cyrillic/Indic/etc. ~2.5, and near-byte-level scripts that
+// barely appear in tokenizer vocabularies (Thai, Georgian, Khmer, ...) plus
+// surrogate halves (an emoji costs ~2 tokens) at ~1 token per code unit.
+function tokenCostPerCodeUnit(code) {
+  if (code < 0x0080) {
+    if (code >= 0x30 && code <= 0x39) return 1 / 3; // digits
+    if ((code >= 0x41 && code <= 0x5a) || (code >= 0x61 && code <= 0x7a)) {
+      return 0.25; // Latin letters
+    }
+    if (code >= 0x21 && code <= 0x7e) return 1 / 1.5; // punctuation & symbols
+    return 0.25; // controls; whitespace never reaches here
+  }
+  if (
+    (code >= 0x0e00 && code <= 0x10ff) || // Thai, Lao, Tibetan, Myanmar, Georgian
+    (code >= 0x1200 && code <= 0x139f) || // Ethiopic
+    (code >= 0x1780 && code <= 0x17ff) || // Khmer
+    (code >= 0xd800 && code <= 0xdfff) // surrogate halves (emoji, astral chars)
+  ) {
+    return 1; // near byte-level: ~1 token per code unit
+  }
   if (
     (code >= 0x2e80 && code <= 0x9fff) || // CJK ideographs, kana, radicals
     (code >= 0xac00 && code <= 0xd7ff) || // Hangul syllables
     (code >= 0xf900 && code <= 0xfaff) // CJK compatibility ideographs
   ) {
-    return 2; // dense: ~1.5 chars/token
+    return 1 / 1.5; // dense: ~1.5 chars/token
   }
   if (
-    (code >= 0x0370 && code <= 0x1fff) || // Greek, Cyrillic, Hebrew, Arabic, Indic, Thai, ...
-    (code >= 0xd800 && code <= 0xdfff) || // surrogate halves (astral chars: emoji, CJK ext.)
+    (code >= 0x0370 && code <= 0x1fff) || // Greek, Cyrillic, Hebrew, Arabic, Indic, ...
     (code >= 0xfb50 && code <= 0xfdff) || // Arabic presentation forms A
     (code >= 0xfe70 && code <= 0xfefe) // Arabic presentation forms B
   ) {
-    return 1; // medium: ~2.5 chars/token
+    return 0.4; // medium: ~2.5 chars/token
   }
-  return 0; // Latin, digits, punctuation, whitespace: ~4 chars/token
+  return 0.25; // accented Latin and the rest: ~4 chars/token
 }
 
 // Derive every count in one pass. The previous implementation scanned the
@@ -336,8 +354,7 @@ function analyzeText(value) {
   let whitespaceNewlines = 0;
   let paragraphs = 0;
   let previousWasWhitespace = true;
-  let denseChars = 0;
-  let mediumChars = 0;
+  let estimatedTokens = 0;
 
   for (let i = 0; i < value.length; i++) {
     const code = value.charCodeAt(i);
@@ -349,13 +366,14 @@ function analyzeText(value) {
     }
 
     if (whitespace) {
+      // Whitespace mostly merges into neighboring tokens, which the English
+      // ~4 chars/token ratio already reflects.
+      estimatedTokens += 0.25;
       previousWasWhitespace = true;
       continue;
     }
 
-    const scriptClass = scriptTokenClass(code);
-    if (scriptClass === 2) denseChars++;
-    else if (scriptClass === 1) mediumChars++;
+    estimatedTokens += tokenCostPerCodeUnit(code);
 
     if (firstNonWhitespace === -1) {
       firstNonWhitespace = i;
@@ -377,9 +395,6 @@ function analyzeText(value) {
 
   const characters =
     firstNonWhitespace === -1 ? 0 : lastNonWhitespace - firstNonWhitespace + 1;
-  // Whitespace stays in the Latin bucket: spaces mostly merge into
-  // neighboring tokens, which the ~4 chars/token ratio already reflects.
-  const latinChars = value.length - denseChars - mediumChars;
 
   return {
     // Trimmed length — leading/trailing whitespace excluded. The raw length
@@ -392,10 +407,7 @@ function analyzeText(value) {
     // Rough AI-tokenizer estimate, weighted by script density, with the
     // English ~0.75 words-per-token guess as a floor for Latin-like text.
     tokens: value.length
-      ? Math.max(
-          Math.ceil(latinChars / 4 + denseChars / 1.5 + mediumChars / 2.5),
-          Math.ceil(words / 0.75)
-        )
+      ? Math.max(Math.ceil(estimatedTokens), Math.ceil(words / 0.75))
       : 0,
   };
 }
@@ -412,7 +424,7 @@ function createTextAnalysisWorker() {
     const source = `
       "use strict";
       ${isWhitespaceCodeUnit.toString()}
-      ${scriptTokenClass.toString()}
+      ${tokenCostPerCodeUnit.toString()}
       ${analyzeText.toString()}
       const looksLikeMarkdown = ${window.looksLikeMarkdown.toString()};
 
