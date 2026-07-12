@@ -82,7 +82,7 @@ body {
 .stats {
   /* --stats-scale is stepped down by fitStats() when the row gets crowded. */
   padding-left: clamp(1.1rem, 3vw, 1.6rem);
-  margin-bottom: 0.85rem;
+  margin-bottom: 1.35rem;
   min-height: 2.1rem;
   white-space: nowrap;
   display: flex;
