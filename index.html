@@ -8,13 +8,13 @@
        inline theme script, the data: favicon, and the blob: analysis worker. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-awjUEo2iga6r8HqKdI4p1upe99JFYEgBE8OxrNmNSeY=' blob: https://gc.zgo.at; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://ilostcount.goatcounter.com; worker-src blob:; connect-src 'self' https://ilostcount.goatcounter.com; object-src 'none'; base-uri 'none'; form-action 'none'" />
   <title>iLostCount: Token Counter</title>
-  <meta name="description" content="A minimal canvas to paste text and instantly see its character, word, and estimated token counts. Free, fast, no tracking." />
+  <meta name="description" content="A minimal canvas to paste text and instantly see its character, word, token, and estimated speech-time counts. Free, fast, no tracking." />
   <link rel="canonical" href="https://ilostcount.com/" />
 
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="iLostCount" />
   <meta property="og:title" content="iLostCount: Token Counter" />
-  <meta property="og:description" content="Paste text, instantly see its character, word, and estimated token counts. Free, fast, no tracking." />
+  <meta property="og:description" content="Paste text, instantly see its character, word, token, and estimated speech time. Free, fast, no tracking." />
   <meta property="og:url" content="https://ilostcount.com/" />
   <meta property="og:image" content="https://ilostcount.com/og.png?v=3" />
   <meta property="og:image:width" content="1200" />
@@ -23,7 +23,7 @@
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="iLostCount: Token Counter" />
-  <meta name="twitter:description" content="Paste text, instantly see its character, word, and estimated token counts. Free, fast, no tracking." />
+  <meta name="twitter:description" content="Paste text, instantly see its character, word, token, and estimated speech time. Free, fast, no tracking." />
   <meta name="twitter:image" content="https://ilostcount.com/og.png?v=3" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔢</text></svg>" />
   <script type="application/ld+json">
@@ -32,7 +32,7 @@
     "@type": "WebApplication",
     "name": "iLostCount: Token Counter",
     "url": "https://ilostcount.com/",
-    "description": "A minimal canvas to paste text and instantly see its character, word, and estimated token counts. Free, fast, no tracking.",
+    "description": "A minimal canvas to paste text and instantly see its character, word, token, and estimated speech-time counts. Free, fast, no tracking.",
     "applicationCategory": "UtilityApplication",
     "operatingSystem": "Any",
     "browserRequirements": "Requires JavaScript",
@@ -43,7 +43,7 @@
     }
   }
   </script>
-  <link rel="stylesheet" href="style.css?v=20260715-5" />
+  <link rel="stylesheet" href="style.css?v=20260716-8" />
   <!-- Set theme before first paint to avoid a flash of the wrong mode -->
   <script>
     (function () {
@@ -75,65 +75,142 @@
   </div>
 
   <main class="app">
-    <div class="editor">
-      <section class="stats" id="stats" aria-live="polite"></section>
+    <div class="editors">
+      <div class="editor" data-editor="primary">
+        <div class="editor__header">
+          <section class="stats" aria-label="Text counters" aria-live="polite"></section>
+        </div>
 
-      <div class="box">
-        <textarea
-          id="input"
-          class="input"
-          aria-label="Text to count"
-          placeholder="Type here"
-          spellcheck="false"
-          autocomplete="off"
-          autocapitalize="off"
-        ></textarea>
+        <div class="box">
+          <textarea
+            id="input"
+            class="input"
+            aria-label="Text to count"
+            placeholder="Type here"
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="off"
+          ></textarea>
 
-        <div id="preview" class="preview preview--hidden" aria-live="polite"></div>
+          <div class="preview preview--hidden" aria-live="polite"></div>
 
-        <div id="pasteZone" class="paste-zone" role="button" tabindex="0" aria-label="Paste from clipboard">
-          <span class="paste-zone__hint">
-            <svg class="paste-zone__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <div class="paste-zone" role="button" tabindex="0" aria-label="Paste from clipboard">
+            <span class="paste-zone__hint">
+              <svg class="paste-zone__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="8" y="3" width="8" height="4" rx="1.5"></rect>
+                <path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"></path>
+              </svg>
+              <span>Paste</span>
+            </span>
+          </div>
+
+          <div
+            class="resize-handle"
+            role="separator"
+            tabindex="0"
+            aria-label="Resize text canvases"
+            aria-orientation="horizontal"
+            aria-valuemin="240"
+          ></div>
+        </div>
+
+        <div class="box-tools">
+          <button class="pill-btn clear-btn clear-btn--hidden" type="button" aria-label="Clear text">
+            <svg class="pill-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m7 21-4.3-4.3a2.25 2.25 0 0 1 0-3.2l9.7-9.7a2.25 2.25 0 0 1 3.2 0l4.6 4.6a2.25 2.25 0 0 1 0 3.2L10.8 21"></path>
+              <path d="M22 21H7M5 11l9 9"></path>
+            </svg>
+            <span>Clear</span>
+          </button>
+
+          <button class="pill-btn preview-btn preview-btn--hidden" type="button" aria-label="View Markdown rendering">
+            <span class="pill-btn__icon" aria-hidden="true"></span>
+            <span class="pill-btn__label">Markdown</span>
+          </button>
+
+          <button class="pill-btn replace-btn replace-btn--hidden" type="button" title="Replace text with clipboard" aria-label="Replace the current text with the clipboard">
+            <svg class="pill-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <rect x="8" y="3" width="8" height="4" rx="1.5"></rect>
               <path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"></path>
             </svg>
-            <span>Paste</span>
-          </span>
-        </div>
+            <span>Replace</span>
+          </button>
 
-        <div
-          id="resizeHandle"
-          class="resize-handle"
-          role="separator"
-          tabindex="0"
-          aria-label="Resize text canvas"
-          aria-orientation="horizontal"
-          aria-valuemin="240"
-        ></div>
+          <button class="pill-btn compare-action compare-action--add" type="button" aria-label="Compare another text" aria-controls="comparisonEditor" aria-expanded="false">
+            <svg class="pill-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <path d="M12 5v14M5 12h14"></path>
+            </svg>
+            <span>Compare</span>
+          </button>
+        </div>
       </div>
 
-      <div class="box-tools">
-        <button id="clearBtn" class="pill-btn clear-btn clear-btn--hidden" type="button" aria-label="Clear text">
-          <!-- Cropped viewBox: the bare X has no built-in padding like the other
-               icons, so an uncropped 24-unit box reads as extra gap before the label. -->
-          <svg class="pill-btn__icon" viewBox="4 4 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-            <path d="M6 6l12 12M18 6L6 18"></path>
-          </svg>
-          <span>Clear</span>
-        </button>
+      <div id="comparisonEditor" class="editor editor--hidden" data-editor="comparison">
+        <div class="editor__header">
+          <section class="stats" aria-label="Comparison text counters" aria-live="polite"></section>
+        </div>
 
-        <button id="previewBtn" class="pill-btn preview-btn preview-btn--hidden" type="button" aria-label="View Markdown rendering">
-          <span class="pill-btn__icon" aria-hidden="true"></span>
-          <span class="pill-btn__label">Markdown</span>
-        </button>
+        <div class="box">
+          <textarea
+            class="input"
+            aria-label="Comparison text to count"
+            placeholder="Type here"
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="off"
+          ></textarea>
 
-        <button id="replaceBtn" class="pill-btn replace-btn replace-btn--hidden" type="button" title="Replace text with clipboard" aria-label="Replace the current text with the clipboard">
-          <svg class="pill-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="8" y="3" width="8" height="4" rx="1.5"></rect>
-            <path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"></path>
-          </svg>
-          <span>Replace</span>
-        </button>
+          <div class="preview preview--hidden" aria-live="polite"></div>
+
+          <div class="paste-zone" role="button" tabindex="0" aria-label="Paste comparison text from clipboard">
+            <span class="paste-zone__hint">
+              <svg class="paste-zone__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="8" y="3" width="8" height="4" rx="1.5"></rect>
+                <path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"></path>
+              </svg>
+              <span>Paste</span>
+            </span>
+          </div>
+
+          <div
+            class="resize-handle"
+            role="separator"
+            tabindex="0"
+            aria-label="Resize text canvases"
+            aria-orientation="horizontal"
+            aria-valuemin="240"
+          ></div>
+        </div>
+
+        <div class="box-tools">
+          <button class="pill-btn clear-btn clear-btn--hidden" type="button" aria-label="Clear comparison text">
+            <svg class="pill-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m7 21-4.3-4.3a2.25 2.25 0 0 1 0-3.2l9.7-9.7a2.25 2.25 0 0 1 3.2 0l4.6 4.6a2.25 2.25 0 0 1 0 3.2L10.8 21"></path>
+              <path d="M22 21H7M5 11l9 9"></path>
+            </svg>
+            <span>Clear</span>
+          </button>
+
+          <button class="pill-btn preview-btn preview-btn--hidden" type="button" aria-label="View Markdown rendering">
+            <span class="pill-btn__icon" aria-hidden="true"></span>
+            <span class="pill-btn__label">Markdown</span>
+          </button>
+
+          <button class="pill-btn replace-btn replace-btn--hidden" type="button" title="Replace text with clipboard" aria-label="Replace the comparison text with the clipboard">
+            <svg class="pill-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="8" y="3" width="8" height="4" rx="1.5"></rect>
+              <path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"></path>
+            </svg>
+            <span>Replace</span>
+          </button>
+
+          <button class="pill-btn compare-action compare-action--remove" type="button" aria-label="Close comparison" aria-controls="comparisonEditor">
+            <svg class="pill-btn__icon" viewBox="4 4 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18"></path>
+            </svg>
+            <span>Close</span>
+          </button>
+        </div>
       </div>
     </div>
   </main>
@@ -146,7 +223,7 @@
   </footer>
 
   <script src="markdown.js"></script>
-  <script src="script.js"></script>
+  <script src="script.js?v=20260716-7"></script>
   <!-- GoatCounter: cookieless page view counts, no personal data -->
   <script data-goatcounter="https://ilostcount.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>

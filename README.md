@@ -1,14 +1,16 @@
 # Token Counter
 
-A very minimal, very simple website: a canvas where you paste text and instantly see its **character, word, and token counts**.
+A very minimal, very simple website: a canvas where you paste text and instantly see its **character, word, token, and estimated speech-time counts**.
 
 No build step, no dependencies: just `index.html`, `style.css`, and `script.js`.
 
 ## Features
 
 - 📋 Paste or type text into a large, rounded canvas
-- 🔢 Live counts: **characters**, **words**, **lines**, **paragraphs**, and **tokens**. Pick which ones to show from the filter menu
+- ↔️ Open a second, side-by-side canvas to compare two texts, with signed differences shown on both sides
+- 🔢 Live counts: **characters**, **words**, **lines**, **paragraphs**, **tokens**, and **estimated speech time**. Pick which ones to show from the filter menu
 - 🧮 The token count is a fast heuristic, not a real tokenizer: ~4 characters per token for Latin text (with a word-based floor), with denser ratios for CJK and Arabic-script text. Expect it to be in the right ballpark, not exact.
+- 🎙️ Speech time uses the trimmed character count, assuming 6 characters per word and 150 spoken words per minute. Durations adapt from seconds to minutes and hours.
 - 📝 Markdown detection with a one-click rendered preview
 - 💾 Your text sticks around across reloads (stored locally in your browser)
 - ↕️ Drag the canvas edge to adjust its height; your preferred size is remembered too
