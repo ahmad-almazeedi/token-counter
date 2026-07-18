@@ -7,6 +7,7 @@ No build step, no dependencies: just `index.html`, `style.css`, and `script.js`.
 ## Features
 
 - 📋 Paste or type text into a large, rounded canvas
+- 📄 Copy either canvas in one click, including the raw source while previewing Markdown
 - ↔️ Open a second, side-by-side canvas to compare two texts, with signed differences shown on both sides
 - 🔢 Live counts: **characters**, **words**, **lines**, **paragraphs**, **tokens**, and **estimated speech time**. Pick which ones to show from the filter menu
 - 🧮 The token count is a fast heuristic, not a real tokenizer: ~4 characters per token for Latin text (with a word-based floor), with denser ratios for CJK and Arabic-script text. Expect it to be in the right ballpark, not exact.

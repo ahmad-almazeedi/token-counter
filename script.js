@@ -25,12 +25,13 @@ const editors = [...document.querySelectorAll("[data-editor]")].map((root) => ({
   input: root.querySelector(".input"),
   statsEl: root.querySelector(".stats"),
   pasteZone: root.querySelector(".paste-zone"),
+  copyBtn: root.querySelector(".copy-btn"),
+  copyIcon: root.querySelector(".copy-btn__icon"),
   clearBtn: root.querySelector(".clear-btn"),
   replaceBtn: root.querySelector(".replace-btn"),
   preview: root.querySelector(".preview"),
   previewBtn: root.querySelector(".preview-btn"),
   previewIcon: root.querySelector(".preview-btn .pill-btn__icon"),
-  previewLabel: root.querySelector(".preview-btn .pill-btn__label"),
   box: root.querySelector(".box"),
   resizeHandle: root.querySelector(".resize-handle"),
   // The comparison is intentionally temporary: closing it or reloading the
@@ -44,6 +45,7 @@ const editors = [...document.querySelectorAll("[data-editor]")].map((root) => ({
   statsUpdateTimer: 0,
   markdownUpdateTimer: 0,
   workerUpdateTimer: 0,
+  copyFeedbackTimer: 0,
   counts: null,
   statsHtmlFull: "",
   statsHtmlShort: "",
@@ -197,13 +199,36 @@ function syncPasteZone(editor, textLength = editor.input.textLength) {
   const replaceNoop = knownClipboard !== null && editor.clipboardMatchesInput;
 
   editor.pasteZone.classList.toggle("paste-zone--hidden", !showZone);
-  editor.clearBtn.classList.toggle("clear-btn--hidden", empty);
-  editor.replaceBtn.classList.toggle("replace-btn--hidden", empty || replaceNoop);
+  editor.copyBtn.disabled = empty;
+  editor.clearBtn.disabled = empty;
+  editor.replaceBtn.disabled = empty || replaceNoop;
   editor.input.placeholder = showZone ? "" : "Type here";
 }
 
 function syncAllPasteZones() {
   editors.forEach((editor) => syncPasteZone(editor));
+}
+
+const COPY_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+const COPIED_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>`;
+
+function renderCopyButton(editor, copied = false) {
+  editor.copyIcon.innerHTML = copied ? COPIED_ICON : COPY_ICON;
+  editor.copyBtn.dataset.tooltip = copied ? "Copied" : "Copy";
+  editor.copyBtn.setAttribute(
+    "aria-label",
+    copied
+      ? "Text copied"
+      : editor === comparisonEditor
+        ? "Copy comparison text"
+        : "Copy text"
+  );
+}
+
+function resetCopyFeedback(editor) {
+  clearTimeout(editor.copyFeedbackTimer);
+  editor.copyFeedbackTimer = 0;
+  renderCopyButton(editor);
 }
 
 editors.forEach((editor) => {
@@ -235,7 +260,9 @@ const PREVIEW_EYE_OFF = `<svg viewBox="0 0 24 24" fill="none" stroke="currentCol
 
 function renderPreviewBtn(editor) {
   editor.previewIcon.innerHTML = editor.previewMode ? PREVIEW_EYE_OFF : PREVIEW_EYE;
-  editor.previewLabel.textContent = editor.previewMode ? "Markdown off" : "Markdown";
+  editor.previewBtn.dataset.tooltip = editor.previewMode
+    ? "Markdown off"
+    : "Markdown";
   editor.previewBtn.setAttribute(
     "aria-label",
     editor.previewMode ? "Turn off Markdown rendering" : "View Markdown rendering"
@@ -251,7 +278,7 @@ function exitPreview(editor) {
 }
 
 function applyMarkdownState(editor, isMarkdown, value = null) {
-  editor.previewBtn.classList.toggle("preview-btn--hidden", !isMarkdown);
+  editor.previewBtn.disabled = !isMarkdown;
   if (!isMarkdown && editor.previewMode) exitPreview(editor);
   else if (editor.previewMode) {
     editor.preview.innerHTML = window.renderMarkdown(
@@ -497,7 +524,7 @@ function createTextAnalysisWorker() {
   }
 }
 
-const DEFAULT_VISIBLE = ["characters", "words", "tokens", "speechTime"];
+const DEFAULT_VISIBLE = ["characters", "words", "tokens"];
 
 function visibleStats() {
   try {
@@ -723,6 +750,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 function updateEditor(editor, { persist = true } = {}) {
+  resetCopyFeedback(editor);
   const textLength = editor.input.textLength;
   editor.revision++;
   syncPasteZone(editor, textLength);
@@ -751,7 +779,7 @@ window.addEventListener("resize", () => {
 
 // ---------- Compare mode ----------
 function renderCompareButton() {
-  compareAddBtn.classList.toggle("compare-action--hidden", compareMode);
+  compareAddBtn.disabled = compareMode;
   compareAddBtn.setAttribute("aria-expanded", String(compareMode));
 }
 
@@ -801,6 +829,57 @@ function refreshClipboardMatches() {
     syncPasteZone(editor);
   });
 }
+
+function fallbackCopyText(text) {
+  const helper = document.createElement("textarea");
+  helper.value = text;
+  helper.setAttribute("readonly", "");
+  helper.style.position = "fixed";
+  helper.style.opacity = "0";
+  helper.style.pointerEvents = "none";
+  document.body.appendChild(helper);
+  helper.select();
+  helper.setSelectionRange(0, helper.value.length);
+
+  let copied = false;
+  try {
+    copied = document.execCommand("copy");
+  } catch (e) {}
+  helper.remove();
+  return copied;
+}
+
+async function copyEditorText(editor) {
+  const text = editor.input.value;
+  if (!text) return;
+
+  activeEditor = editor;
+  let copied = false;
+  try {
+    if (!navigator.clipboard || !navigator.clipboard.writeText) {
+      throw new Error("Clipboard API unavailable");
+    }
+    await navigator.clipboard.writeText(text);
+    copied = true;
+  } catch (e) {
+    copied = fallbackCopyText(text);
+  }
+
+  if (!copied) return;
+
+  knownClipboard = text;
+  refreshClipboardMatches();
+  clearTimeout(editor.copyFeedbackTimer);
+  renderCopyButton(editor, true);
+  editor.copyFeedbackTimer = window.setTimeout(() => {
+    editor.copyFeedbackTimer = 0;
+    renderCopyButton(editor);
+  }, 1400);
+}
+
+editors.forEach((editor) => {
+  editor.copyBtn.addEventListener("click", () => copyEditorText(editor));
+});
 
 async function doPaste(editor) {
   activeEditor = editor;
