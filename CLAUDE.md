@@ -8,7 +8,7 @@ Always commit and push after every change.
 
 ## Design
 
-Grayscale only — never introduce any color/hue anywhere (no accents, no colored states, no tinted links). Everything stays in shades of gray, black, and white. Light mode background is #fcfcfc; dark mode background is pure black (#000).
+Grayscale by default — the site's look is monochrome (light mode background #fcfcfc, dark mode pure black #000). Color is allowed when it genuinely earns its place (e.g. a destructive-action warning), but should stay rare and deliberate, never decorative.
 
 ## Dev server
 
