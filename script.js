@@ -24,7 +24,6 @@ const editors = [...document.querySelectorAll("[data-editor]")].map((root) => ({
   root,
   input: root.querySelector(".input"),
   statsEl: root.querySelector(".stats"),
-  pasteZone: root.querySelector(".paste-zone"),
   copyBtn: root.querySelector(".copy-btn"),
   copyIcon: root.querySelector(".copy-btn__icon"),
   clearBtn: root.querySelector(".clear-btn"),
@@ -193,20 +192,24 @@ window.addEventListener("pagehide", () => {
 });
 
 // ---------- Empty state ----------
-function syncPasteZone(editor, textLength = editor.input.textLength) {
+function syncEditorTools(editor, textLength = editor.input.textLength) {
   const empty = textLength === 0;
-  const showZone = empty && !editor.inputFocused;
   const replaceNoop = knownClipboard !== null && editor.clipboardMatchesInput;
 
-  editor.pasteZone.classList.toggle("paste-zone--hidden", !showZone);
   editor.copyBtn.disabled = empty;
   editor.clearBtn.disabled = empty;
-  editor.replaceBtn.disabled = empty || replaceNoop;
-  editor.input.placeholder = showZone ? "" : "Type here";
-}
-
-function syncAllPasteZones() {
-  editors.forEach((editor) => syncPasteZone(editor));
+  editor.replaceBtn.disabled = replaceNoop;
+  editor.replaceBtn.dataset.tooltip = empty ? "Paste" : "Paste & Replace";
+  editor.replaceBtn.setAttribute(
+    "aria-label",
+    empty
+      ? editor === comparisonEditor
+        ? "Paste comparison text from clipboard"
+        : "Paste from clipboard"
+      : editor === comparisonEditor
+        ? "Replace the comparison text with the clipboard"
+        : "Replace the current text with the clipboard"
+  );
 }
 
 const COPY_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
@@ -235,16 +238,10 @@ editors.forEach((editor) => {
   editor.input.addEventListener("focus", () => {
     activeEditor = editor;
     editor.inputFocused = true;
-    syncPasteZone(editor);
   });
 
   editor.input.addEventListener("blur", () => {
     editor.inputFocused = false;
-    syncPasteZone(editor);
-  });
-
-  editor.pasteZone.addEventListener("focus", () => {
-    activeEditor = editor;
   });
 });
 
@@ -753,7 +750,7 @@ function updateEditor(editor, { persist = true } = {}) {
   resetCopyFeedback(editor);
   const textLength = editor.input.textLength;
   editor.revision++;
-  syncPasteZone(editor, textLength);
+  syncEditorTools(editor, textLength);
   scheduleTextAnalysis(editor, textLength);
   if (persist) scheduleTextSave(editor);
 }
@@ -826,7 +823,7 @@ function refreshClipboardMatches() {
     editor.clipboardMatchesInput =
       knownClipboard.length === editor.input.textLength &&
       knownClipboard === editor.input.value;
-    syncPasteZone(editor);
+    syncEditorTools(editor);
   });
 }
 
@@ -900,14 +897,7 @@ async function doPaste(editor) {
 }
 
 editors.forEach((editor) => {
-  editor.pasteZone.addEventListener("click", () => doPaste(editor));
   editor.replaceBtn.addEventListener("click", () => doPaste(editor));
-  editor.pasteZone.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      doPaste(editor);
-    }
-  });
 });
 
 document.addEventListener("keydown", (e) => {
