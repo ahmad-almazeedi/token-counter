@@ -699,9 +699,6 @@ body {
 /* A dotted underline is enough to say "this does something". Anything
    heavier competes with the empty canvas for attention. */
 .footer__toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.28rem;
   padding: 0;
   font: inherit;
   color: inherit;
@@ -723,24 +720,16 @@ body {
   border-radius: 3px;
 }
 
-.footer__toggle-chevron {
-  width: 0.8em;
-  height: 0.8em;
-  opacity: 0.7;
-  transition: transform 0.2s ease;
-}
-
+/* Zero line-height so the oversized glyph can't grow the footer's line box
+   and pull the canvas off centre. */
 .footer__divider {
+  font-size: 1.7em;
+  line-height: 0;
   opacity: 0.55;
 }
 
-.footer__toggle[aria-expanded="true"] .footer__toggle-chevron {
-  transform: rotate(180deg);
-}
-
-/* The dotted rule the footer's controls share. On the toggle it hugs the
-   label only, so the chevron doesn't drag the line out past the text. */
-.footer__toggle > :not(svg),
+/* The dotted rule the footer's controls share. */
+.footer__toggle span,
 .footer__link {
   text-decoration: underline;
   text-decoration-style: dotted;
@@ -750,8 +739,8 @@ body {
   transition: text-decoration-color 0.2s ease;
 }
 
-.footer__toggle:hover > :not(svg),
-.footer__toggle:focus-visible > :not(svg),
+.footer__toggle:hover span,
+.footer__toggle:focus-visible span,
 .footer__link:hover,
 .footer__link:focus-visible {
   text-decoration-color: currentColor;
