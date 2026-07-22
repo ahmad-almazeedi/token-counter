@@ -1008,6 +1008,59 @@ systemDark.addEventListener("change", () => {
   if (!storedTheme()) renderIcon();
 });
 
+// ---------- Reference copy ----------
+// Ships collapsed: the canvas keeps the first screen, and scrolling never
+// lands you in prose you didn't ask for.
+const aboutEl = document.getElementById("about");
+const aboutToggle = document.getElementById("aboutToggle");
+const aboutClose = document.getElementById("aboutClose");
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+function scrollBehavior() {
+  return reducedMotion.matches ? "auto" : "smooth";
+}
+
+// Tracks whether the reader has actually travelled into the copy, so the
+// scroll back to the top can close it again without the opening scroll
+// (which starts at the top) closing it immediately.
+let leftTopWhileOpen = false;
+
+function openAbout() {
+  aboutEl.hidden = false;
+  aboutToggle.setAttribute("aria-expanded", "true");
+  leftTopWhileOpen = false;
+  aboutEl.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
+}
+
+function closeAbout({ focus = true } = {}) {
+  // Hiding shrinks the document back to a single screen, so the browser
+  // clamps the scroll to the top on its own. No animation to chase and no
+  // timer that a long smooth scroll could outlast.
+  aboutEl.hidden = true;
+  aboutToggle.setAttribute("aria-expanded", "false");
+  leftTopWhileOpen = false;
+  if (focus) aboutToggle.focus();
+}
+
+aboutToggle.addEventListener("click", () => {
+  if (aboutEl.hidden) openAbout();
+  else closeAbout();
+});
+
+aboutClose.addEventListener("click", () => closeAbout());
+
+// Scrolling back to the counter puts the page away again, so the canvas
+// can't be scrolled off by accident without asking for the copy first.
+window.addEventListener(
+  "scroll",
+  () => {
+    if (aboutEl.hidden) return;
+    if (window.scrollY > 40) leftTopWhileOpen = true;
+    else if (leftTopWhileOpen) closeAbout({ focus: false });
+  },
+  { passive: true }
+);
+
 // ---------- Init ----------
 restoreEditorHeight();
 try {

@@ -88,10 +88,10 @@ body {
   display: flex;
   flex-direction: column;
   gap: clamp(1.5rem, 4vw, 2.25rem);
-  /* Exact vertical center, raised by the footer's height (~1rem: one line
-     of 0.75rem text) plus a 2px nudge so the fixed footer below doesn't
-     make it feel low. */
-  transform: translateY(calc(-1rem - 2px));
+  /* Exact vertical center, raised by the footer's height (~1.93rem now that
+     it carries an outlined pill) plus a 2px nudge so the footer below
+     doesn't make it feel low. */
+  transform: translateY(calc(-1.93rem - 2px));
   transition: max-width 0.25s ease;
 }
 
@@ -666,7 +666,9 @@ body {
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  /* Wide enough that the pill reads as its own control rather than as part
+     of the credit line beside it. */
+  gap: 1.15rem;
   font-size: 0.75rem;
   color: color-mix(in srgb, var(--muted) 72%, transparent);
   transition: color 0.2s ease;
@@ -697,6 +699,44 @@ body {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* An outlined pill so it reads as a control at rest, not only on hover.
+   Borrows the canvas border so it belongs to the same family of shapes. */
+.footer__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.34rem 0.7rem 0.34rem 0.8rem;
+  font: inherit;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.footer__toggle:hover,
+.footer__toggle:focus-visible {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.footer__toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.footer__toggle-chevron {
+  width: 0.85em;
+  height: 0.85em;
+  transition: transform 0.2s ease;
+}
+
+.footer__toggle[aria-expanded="true"] .footer__toggle-chevron {
+  transform: rotate(180deg);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -802,4 +842,40 @@ body {
 
 .about__list dd {
   margin: 0.15rem 0 0;
+}
+
+/* The way back up, since the footer toggle is off-screen by the time you
+   have read this far. */
+/* The way back up, since the footer's toggle is far off-screen by the time
+   you have read this far. Same pill as the toggle, chevron reversed. */
+.about__close {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 3rem;
+  padding: 0.45rem 0.95rem 0.45rem 0.8rem;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.about__close:hover,
+.about__close:focus-visible {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.about__close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.about__close-chevron {
+  width: 0.9em;
+  height: 0.9em;
 }
