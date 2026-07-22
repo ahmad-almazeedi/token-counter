@@ -63,9 +63,22 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ---------- Stage ---------- */
+/* The working canvas keeps the whole first screen to itself, centred exactly
+   as it was before the reference copy below it existed. */
+.stage {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
   padding: clamp(1.25rem, 4vw, 3rem);
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* ---------- App layout ---------- */
@@ -643,8 +656,10 @@ body {
 
 /* ---------- Footer ---------- */
 .footer {
-  /* Out of the flow so it doesn't pull the editor off true vertical center. */
-  position: fixed;
+  /* Out of the flow so it doesn't pull the editor off true vertical center.
+     Pinned to the stage rather than the viewport so it scrolls away with the
+     first screen instead of hovering over the copy below. */
+  position: absolute;
   /* Original 1.1rem raised by exactly 12px. */
   bottom: calc(1.1rem + 12px);
   left: 50%;
@@ -726,4 +741,65 @@ body {
     padding: 0;
   }
 
+}
+
+/* ---------- Below the fold: reference copy ---------- */
+/* Deliberately quiet. It exists for people who scroll and for search engines,
+   and must never compete with the empty canvas above it. */
+.about {
+  width: 100%;
+  max-width: 680px;
+  padding: clamp(3rem, 10vh, 7rem) clamp(1.25rem, 4vw, 3rem)
+    clamp(4rem, 12vh, 8rem);
+  color: var(--muted);
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  /* A hairline is the only cue that the page continues. */
+  border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+}
+
+.about h1 {
+  margin: 0 0 1.25rem;
+  color: var(--text);
+  font-size: clamp(1.35rem, 3.5vw, 1.75rem);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.about h2 {
+  margin: 2.75rem 0 0.85rem;
+  color: var(--text);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+.about h3 {
+  margin: 1.75rem 0 0.4rem;
+  color: color-mix(in srgb, var(--muted) 40%, var(--text));
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.about p {
+  margin: 0 0 1rem;
+}
+
+.about__lede {
+  color: color-mix(in srgb, var(--muted) 55%, var(--text));
+}
+
+.about__list {
+  margin: 0;
+}
+
+.about__list dt {
+  margin-top: 1.25rem;
+  color: color-mix(in srgb, var(--muted) 40%, var(--text));
+  font-weight: 600;
+}
+
+.about__list dd {
+  margin: 0.15rem 0 0;
 }

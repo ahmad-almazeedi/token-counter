@@ -7,14 +7,14 @@
   <!-- Defense-in-depth CSP. Static site: only self scripts/styles, the hashed
        inline theme script, the data: favicon, and the blob: analysis worker. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-awjUEo2iga6r8HqKdI4p1upe99JFYEgBE8OxrNmNSeY=' blob: https://gc.zgo.at; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://ilostcount.goatcounter.com; worker-src blob:; connect-src 'self' https://ilostcount.goatcounter.com; object-src 'none'; base-uri 'none'; form-action 'none'" />
-  <title>iLostCount: Token Counter</title>
-  <meta name="description" content="A minimal canvas to paste text and instantly see its character, word, token, and estimated speech-time counts. Free, fast, no tracking." />
+  <title>Character Counter, Word Counter &amp; Token Counter | iLostCount</title>
+  <meta name="description" content="Free online character counter and word counter. Paste text to see characters, words, AI tokens, and estimated speaking time instantly. No signup, no tracking." />
   <link rel="canonical" href="https://ilostcount.com/" />
 
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="iLostCount" />
-  <meta property="og:title" content="iLostCount: Token Counter" />
-  <meta property="og:description" content="Paste text, instantly see its character, word, token, and estimated speech time. Free, fast, no tracking." />
+  <meta property="og:title" content="Character Counter, Word Counter &amp; Token Counter" />
+  <meta property="og:description" content="Paste text to see characters, words, AI tokens, and estimated speaking time instantly. Free, fast, no tracking." />
   <meta property="og:url" content="https://ilostcount.com/" />
   <meta property="og:image" content="https://ilostcount.com/og.png?v=3" />
   <meta property="og:image:width" content="1200" />
@@ -22,28 +22,98 @@
   <meta property="og:image:alt" content="iLostCount: Token Counter" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="iLostCount: Token Counter" />
-  <meta name="twitter:description" content="Paste text, instantly see its character, word, token, and estimated speech time. Free, fast, no tracking." />
+  <meta name="twitter:title" content="Character Counter, Word Counter &amp; Token Counter" />
+  <meta name="twitter:description" content="Paste text to see characters, words, AI tokens, and estimated speaking time instantly. Free, fast, no tracking." />
   <meta name="twitter:image" content="https://ilostcount.com/og.png?v=3" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔢</text></svg>" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "iLostCount: Token Counter",
-    "url": "https://ilostcount.com/",
-    "description": "A minimal canvas to paste text and instantly see its character, word, token, and estimated speech-time counts. Free, fast, no tracking.",
-    "applicationCategory": "UtilityApplication",
-    "operatingSystem": "Any",
-    "browserRequirements": "Requires JavaScript",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    }
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "@id": "https://ilostcount.com/#app",
+        "name": "iLostCount",
+        "alternateName": "iLostCount Character Counter",
+        "url": "https://ilostcount.com/",
+        "description": "Free online character counter, word counter, and AI token counter. Paste text to see characters, words, lines, paragraphs, tokens, and estimated speaking time instantly.",
+        "applicationCategory": "UtilityApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript",
+        "isAccessibleForFree": true,
+        "featureList": [
+          "Character count",
+          "Word count",
+          "Line and paragraph count",
+          "AI token count estimate",
+          "Speaking time estimate",
+          "Side by side text comparison",
+          "Markdown preview"
+        ],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://ilostcount.com/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How do I count characters in a text online?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Paste or type your text into the box on this page. The character count updates as you type, with no button to press and nothing to install. Nothing is uploaded: the counting happens inside your browser."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does the character count include spaces?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. The main character count includes spaces and punctuation, but ignores blank space at the very start and end of your text. If you want the exact raw length including that outer whitespace, turn on the \"Characters (raw)\" counter from the filter menu."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is a token, and how is the token count calculated?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A token is the unit AI models such as Claude and GPT use to read text. A token is usually a short word or a piece of a longer word, so English text averages roughly 4 characters per token. This page gives a fast estimate from your text's length and word count. The exact number varies by model, so treat it as a close approximation rather than a billing figure."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How many words is a 5 minute speech?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "At a normal presentation pace of about 150 words per minute, a 5 minute speech is roughly 750 words. The speech time counter on this page applies that same 150 words per minute pace to your text, so you can trim a script until it fits your slot."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I count words in two texts at once?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Press the compare button to open a second box beside the first. Both texts are counted independently and the difference between them is shown next to each count, which is useful for checking a rewrite against an original or fitting a draft to a word limit."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is my text stored or sent anywhere?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. All counting runs locally in your browser. Your text is never sent to a server, never stored, and there is no account or sign up. The site uses cookieless page view counts only."
+            }
+          }
+        ]
+      }
+    ]
   }
   </script>
-  <link rel="stylesheet" href="style.css?v=20260718-2" />
+  <link rel="stylesheet" href="style.css?v=20260722" />
   <!-- Set theme before first paint to avoid a flash of the wrong mode -->
   <script>
     (function () {
@@ -74,6 +144,9 @@
     </button>
   </div>
 
+  <!-- The tool owns the first screen exactly as before. Reference copy sits
+       below the fold so scrolling, not the working canvas, reveals it. -->
+  <div class="stage">
   <main class="app">
     <div class="editors">
       <div class="editor" data-editor="primary">
@@ -201,6 +274,105 @@
       <a class="footer__link" href="https://atmita.com" target="_blank" rel="noopener" title="Hire an AI team for your startup">Atmita</a>
       — an AI team for your startup</span>
   </footer>
+  </div>
+
+  <article class="about">
+    <h1>Free online character counter, word counter, and token counter</h1>
+    <p class="about__lede">
+      iLostCount is a plain text box that keeps a running count of everything
+      above it. Paste a draft, a prompt, or a bio into the canvas at the top of
+      this page and the characters, words, and AI tokens update as you type.
+      There is no button to press, no upload, and no account. The counting runs
+      inside your browser, so your text never leaves your device.
+    </p>
+
+    <h2>What it counts</h2>
+    <dl class="about__list">
+      <dt>Characters</dt>
+      <dd>
+        Every letter, digit, space, and punctuation mark, ignoring blank space
+        at the very start and end. Useful for the hard limits on social posts,
+        meta descriptions, SMS messages, and application forms. A raw character
+        count that keeps outer whitespace is available in the filter menu.
+      </dd>
+
+      <dt>Words</dt>
+      <dd>
+        Runs of text separated by whitespace, counted the way an essay, article,
+        or word limit expects.
+      </dd>
+
+      <dt>Lines and paragraphs</dt>
+      <dd>
+        How many lines your text occupies and how many blocks it is split into,
+        handy for formatting checks and for anything with a per line limit.
+      </dd>
+
+      <dt>Tokens</dt>
+      <dd>
+        An estimate of how many tokens an AI model such as Claude or GPT would
+        read your text as. English averages roughly four characters per token,
+        so a 1,000 character prompt is usually somewhere near 250 tokens. Use it
+        to keep prompts inside a context window or to sanity check API cost
+        before you send a request.
+      </dd>
+
+      <dt>Speaking time</dt>
+      <dd>
+        How long the text takes to read aloud at a normal presentation pace of
+        150 words per minute. Written a talk, a video script, or a voiceover?
+        This tells you whether it fits the slot.
+      </dd>
+    </dl>
+
+    <h2>Compare two texts side by side</h2>
+    <p>
+      The compare button opens a second canvas next to the first. Each side is
+      counted on its own and the difference between them appears beside every
+      count, which makes it quick to check an edit against the original, fit a
+      rewrite to the same length, or see how much a shorter prompt saves you.
+      A Markdown preview button renders either side as formatted text without
+      changing what is counted.
+    </p>
+
+    <h2>Frequently asked questions</h2>
+
+    <h3>How do I count characters in a text online?</h3>
+    <p>
+      Paste or type into the box at the top of this page. The character count
+      updates as you type, with nothing to press and nothing to install.
+    </p>
+
+    <h3>Does the character count include spaces?</h3>
+    <p>
+      Yes. The main count includes spaces and punctuation but ignores blank
+      space at the very start and end of your text. For the exact raw length
+      including that outer whitespace, turn on Characters (raw) in the filter
+      menu.
+    </p>
+
+    <h3>What is a token, and how is the token count calculated?</h3>
+    <p>
+      A token is the unit AI models use to read text, usually a short word or a
+      piece of a longer one. This page estimates the count from your text's
+      length and word count. The exact number varies by model, so treat it as a
+      close approximation rather than a billing figure.
+    </p>
+
+    <h3>How many words is a 5 minute speech?</h3>
+    <p>
+      At about 150 words per minute, roughly 750 words. The speaking time
+      counter applies that same pace to your text, so you can trim a script
+      until it fits.
+    </p>
+
+    <h3>Is my text stored or sent anywhere?</h3>
+    <p>
+      No. All counting runs locally in your browser. Your text is never sent to
+      a server, never stored, and there is no sign up. The site records
+      cookieless page view counts only.
+    </p>
+  </article>
 
   <script src="markdown.js"></script>
   <script src="script.js?v=20260718-2"></script>
