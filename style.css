@@ -88,10 +88,10 @@ body {
   display: flex;
   flex-direction: column;
   gap: clamp(1.5rem, 4vw, 2.25rem);
-  /* Exact vertical center, raised by the footer's height (~1.93rem now that
-     it carries an outlined pill) plus a 2px nudge so the footer below
-     doesn't make it feel low. */
-  transform: translateY(calc(-1.93rem - 2px));
+  /* Exact vertical center, raised by the footer's height (~1rem: one line
+     of 0.75rem text) plus a 2px nudge so the footer below doesn't
+     make it feel low. */
+  transform: translateY(calc(-1rem - 2px));
   transition: max-width 0.25s ease;
 }
 
@@ -666,9 +666,7 @@ body {
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  /* Wide enough that the pill reads as its own control rather than as part
-     of the credit line beside it. */
-  gap: 1.15rem;
+  gap: 0.6rem;
   font-size: 0.75rem;
   color: color-mix(in srgb, var(--muted) 72%, transparent);
   transition: color 0.2s ease;
@@ -684,15 +682,12 @@ body {
   align-items: center;
   gap: 0.35rem;
   color: inherit;
-  text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .footer__link:hover,
 .footer__link:focus-visible {
   color: var(--text);
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
 }
 
 .footer__link:focus-visible {
@@ -701,42 +696,65 @@ body {
   border-radius: 4px;
 }
 
-/* An outlined pill so it reads as a control at rest, not only on hover.
-   Borrows the canvas border so it belongs to the same family of shapes. */
+/* A dotted underline is enough to say "this does something". Anything
+   heavier competes with the empty canvas for attention. */
 .footer__toggle {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.34rem 0.7rem 0.34rem 0.8rem;
+  gap: 0.28rem;
+  padding: 0;
   font: inherit;
-  color: var(--muted);
+  color: inherit;
   background: none;
-  border: 1px solid var(--border);
-  border-radius: 999px;
+  border: 0;
   cursor: pointer;
   white-space: nowrap;
-  transition: color 0.2s ease, border-color 0.2s ease;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
 }
 
 .footer__toggle:hover,
 .footer__toggle:focus-visible {
   color: var(--text);
-  border-color: var(--muted);
 }
 
 .footer__toggle:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline-offset: 3px;
+  border-radius: 3px;
 }
 
 .footer__toggle-chevron {
-  width: 0.85em;
-  height: 0.85em;
+  width: 0.8em;
+  height: 0.8em;
+  opacity: 0.7;
   transition: transform 0.2s ease;
+}
+
+.footer__divider {
+  opacity: 0.55;
 }
 
 .footer__toggle[aria-expanded="true"] .footer__toggle-chevron {
   transform: rotate(180deg);
+}
+
+/* The dotted rule the footer's controls share. On the toggle it hugs the
+   label only, so the chevron doesn't drag the line out past the text. */
+.footer__toggle > :not(svg),
+.footer__link {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  text-decoration-color: currentColor;
+  transition: text-decoration-color 0.2s ease;
+}
+
+.footer__toggle:hover > :not(svg),
+.footer__toggle:focus-visible > :not(svg),
+.footer__link:hover,
+.footer__link:focus-visible {
+  text-decoration-color: currentColor;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -847,35 +865,48 @@ body {
 /* The way back up, since the footer toggle is off-screen by the time you
    have read this far. */
 /* The way back up, since the footer's toggle is far off-screen by the time
-   you have read this far. Same pill as the toggle, chevron reversed. */
+   you have read this far. Same dotted rule as the footer's controls. */
 .about__close {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.28rem;
   margin-top: 3rem;
-  padding: 0.45rem 0.95rem 0.45rem 0.8rem;
+  padding: 0;
   font: inherit;
-  font-size: 0.875rem;
-  color: var(--muted);
+  color: inherit;
   background: none;
-  border: 1px solid var(--border);
-  border-radius: 999px;
+  border: 0;
   cursor: pointer;
-  transition: color 0.2s ease, border-color 0.2s ease;
+  transition: color 0.2s ease;
+}
+
+.about__close > :not(svg) {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  text-decoration-color: currentColor;
+  transition: text-decoration-color 0.2s ease;
 }
 
 .about__close:hover,
 .about__close:focus-visible {
   color: var(--text);
-  border-color: var(--muted);
+}
+
+.about__close:hover > :not(svg),
+.about__close:focus-visible > :not(svg) {
+  text-decoration-color: currentColor;
 }
 
 .about__close:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline-offset: 3px;
+  border-radius: 3px;
 }
 
 .about__close-chevron {
-  width: 0.9em;
-  height: 0.9em;
+  width: 0.85em;
+  height: 0.85em;
+  opacity: 0.7;
 }
