@@ -81,7 +81,7 @@
             "name": "What is a token, and how is the token count calculated?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "A token is the unit AI models such as Claude and GPT use to read text. A token is usually a short word or a piece of a longer word, so English text averages roughly 4 characters per token. This page gives a fast estimate from your text's length and word count. The exact number varies by model, so treat it as a close approximation rather than a billing figure."
+              "text": "A token is the unit AI models such as Claude and GPT use to read text. A token is usually a short word or a piece of a longer word, so plain English averages about 4 characters per token. This page estimates the count from your text, weighting digits, punctuation, and scripts such as Chinese, Korean, and Thai more heavily than plain letters. The exact number varies by model, so treat it as a close approximation rather than a billing figure."
             }
           },
           {
@@ -105,7 +105,7 @@
             "name": "Is my text stored or sent anywhere?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "No. All counting runs locally in your browser. Your text is never sent to a server, never stored, and there is no account or sign up. The site uses cookieless page view counts only."
+              "text": "All counting runs locally in your browser, and your text is never sent to a server. It does stay on your own device: what you type in the main box is kept in that browser's local storage so it is still there when you come back. Clearing the box deletes it, and so does clearing your browser data. There is no account and no sign up. The site records cookieless page view counts only."
             }
           }
         ]
@@ -311,16 +311,19 @@
       <dt>Tokens</dt>
       <dd>
         An estimate of how many tokens an AI model such as Claude or GPT would
-        read your text as. English averages roughly four characters per token,
-        so a 1,000 character prompt is usually somewhere near 250 tokens. Use it
-        to keep prompts inside a context window or to sanity check API cost
-        before you send a request.
+        read your text as. Plain English runs at about four characters per
+        token, so a 1,000 character prompt usually lands near 250. Digits,
+        punctuation, and scripts such as Chinese, Korean, and Thai are weighted
+        more heavily, the way real tokenizers treat them. Use it to keep prompts
+        inside a context window or to sanity check cost before you send a
+        request.
       </dd>
 
       <dt>Speaking time</dt>
       <dd>
-        How long the text takes to read aloud at a normal presentation pace of
-        150 words per minute. Written a talk, a video script, or a voiceover?
+        How long the text takes to read aloud, estimated at a normal
+        presentation pace of 150 words per minute and an average of six
+        characters per word. Written a talk, a video script, or a voiceover?
         This tells you whether it fits the slot.
       </dd>
     </dl>
@@ -368,9 +371,12 @@
 
     <h3>Is my text stored or sent anywhere?</h3>
     <p>
-      No. All counting runs locally in your browser. Your text is never sent to
-      a server, never stored, and there is no sign up. The site records
-      cookieless page view counts only.
+      All counting runs locally in your browser, and your text is never sent to
+      a server. It does stay on your own device: what you type in the main box
+      is kept in that browser's local storage, so it is still there when you
+      come back. Clearing the box deletes it, and so does clearing your browser
+      data. There is no account and no sign up, and the site records cookieless
+      page view counts only.
     </p>
   </article>
 
