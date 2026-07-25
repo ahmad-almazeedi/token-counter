@@ -662,18 +662,20 @@ body {
   position: absolute;
   /* Original 1.1rem raised by exactly 12px. */
   bottom: calc(1.1rem + 12px);
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  /* Never wider than the screen: without this the line keeps its natural
-     width and the second half squeezes into a ragged column. */
-  max-width: 100%;
+  /* Spanning the stage rather than left:50% + translate: pinned at the
+     midpoint the box only gets half the stage to lay out in, which is what
+     shredded the line into a narrow column on small screens. */
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  /* One run of centered text, not two flex children: when it has to wrap it
+     reflows like a sentence instead of splitting into two ragged columns. */
+  display: block;
+  max-width: min(100%, 38rem);
   padding: 0 1.25rem;
   box-sizing: border-box;
   text-align: center;
+  line-height: 1.6;
   font-size: 0.75rem;
   color: color-mix(in srgb, var(--muted) 72%, transparent);
   transition: color 0.2s ease;
@@ -730,6 +732,7 @@ body {
 /* Zero line-height so the oversized glyph can't grow the footer's line box
    and pull the canvas off centre. */
 .footer__divider {
+  margin: 0 0.5rem;
   font-size: 1.7em;
   line-height: 0;
   opacity: 0.55;
@@ -795,15 +798,25 @@ body {
     padding: 0;
   }
 
-  /* One line per thought instead of two columns fighting over 360px. */
-  .footer {
-    flex-direction: column;
-    gap: 0.4rem;
-    line-height: 1.5;
-  }
+}
 
+/* Tight widths get the short version of the sentence: the tagline is the
+   first thing worth dropping, and losing it keeps the line to one row. */
+@media (max-width: 760px) {
+  .footer__tail {
+    display: none;
+  }
+}
+
+/* Too narrow for one line even shortened, so each half gets its own centered
+   row and the divider goes: a stray "·" starting a line reads as a seam. */
+@media (max-width: 600px) {
   .footer__divider {
     display: none;
+  }
+
+  .footer__more {
+    display: block;
   }
 }
 
