@@ -677,7 +677,7 @@ body {
   text-align: center;
   line-height: 1.6;
   font-size: 0.75rem;
-  color: color-mix(in srgb, var(--muted) 72%, transparent);
+  color: color-mix(in srgb, var(--muted) 55%, transparent);
   transition: color 0.2s ease;
 }
 
@@ -729,23 +729,24 @@ body {
   border-radius: 3px;
 }
 
-/* Zero line-height so the oversized glyph can't grow the footer's line box
-   and pull the canvas off centre. */
+/* Zero line-height so the glyph can't grow the footer's line box and pull the
+   canvas off centre. */
 .footer__divider {
   margin: 0 0.5rem;
-  font-size: 1.7em;
   line-height: 0;
-  opacity: 0.55;
+  opacity: 0.45;
 }
 
-/* The dotted rule the footer's controls share. */
+/* Underlined at rest, three dotted rules in one 12px line read as clutter and
+   drag the eye down. The rule is declared here but drawn only on hover and
+   focus, so the resting line is plain text and nothing shifts when it appears. */
 .footer__toggle span,
 .footer__link {
   text-decoration: underline;
   text-decoration-style: dotted;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.3em;
-  text-decoration-color: currentColor;
+  text-decoration-color: transparent;
   transition: text-decoration-color 0.2s ease;
 }
 
