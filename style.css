@@ -666,7 +666,14 @@ body {
   transform: translateX(-50%);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.6rem;
+  /* Never wider than the screen: without this the line keeps its natural
+     width and the second half squeezes into a ragged column. */
+  max-width: 100%;
+  padding: 0 1.25rem;
+  box-sizing: border-box;
+  text-align: center;
   font-size: 0.75rem;
   color: color-mix(in srgb, var(--muted) 72%, transparent);
   transition: color 0.2s ease;
@@ -788,6 +795,16 @@ body {
     padding: 0;
   }
 
+  /* One line per thought instead of two columns fighting over 360px. */
+  .footer {
+    flex-direction: column;
+    gap: 0.4rem;
+    line-height: 1.5;
+  }
+
+  .footer__divider {
+    display: none;
+  }
 }
 
 /* ---------- Below the fold: reference copy ---------- */
