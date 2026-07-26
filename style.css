@@ -732,7 +732,10 @@ body {
 /* Zero line-height so the glyph can't grow the footer's line box and pull the
    canvas off centre. */
 .footer__divider {
-  margin: 0 0.5rem;
+  /* Sized up and pulled in tight: a bigger glyph with less air around it reads
+     as a join between two halves of one line, not a gap between two blocks. */
+  margin: 0 0.32rem;
+  font-size: 2em;
   line-height: 0;
   opacity: 0.45;
 }
