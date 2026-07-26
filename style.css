@@ -817,11 +817,28 @@ body {
   }
 }
 
-/* Phones get the shortest version there is, "How the counts work · Atmita",
-   because the footer folding onto a second line is worse than losing words. */
+/* The short lead only exists for phones, where "More from" is three words the
+   line cannot afford but the developer still deserves a mention. */
+.footer__lead-short {
+  display: none;
+}
+
 @media (max-width: 600px) {
   .footer__lead {
     display: none;
+  }
+
+  .footer__lead-short {
+    display: inline;
+  }
+}
+
+/* The last 40px of phone width: a hair smaller and tighter to the edges, which
+   is cheaper than dropping the one remaining mention of the developer. */
+@media (max-width: 380px) {
+  .footer {
+    padding: 0 0.75rem;
+    font-size: 0.7rem;
   }
 }
 
