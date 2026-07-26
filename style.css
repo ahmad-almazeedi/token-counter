@@ -750,9 +750,11 @@ body {
   transition: text-decoration-color 0.2s ease;
 }
 
-.footer__toggle:hover span,
+/* Anywhere on the line is enough: once the footer lights up, every control in
+   it says so, rather than waiting for the pointer to land on one exactly. */
+.footer:hover .footer__toggle span,
+.footer:hover .footer__link,
 .footer__toggle:focus-visible span,
-.footer__link:hover,
 .footer__link:focus-visible {
   text-decoration-color: currentColor;
 }
