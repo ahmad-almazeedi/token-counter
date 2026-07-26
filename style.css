@@ -817,15 +817,11 @@ body {
   }
 }
 
-/* Too narrow for one line even shortened, so each half gets its own centered
-   row and the divider goes: a stray "·" starting a line reads as a seam. */
+/* Phones get the shortest version there is, "How the counts work · Atmita",
+   because the footer folding onto a second line is worse than losing words. */
 @media (max-width: 600px) {
-  .footer__divider {
+  .footer__lead {
     display: none;
-  }
-
-  .footer__more {
-    display: block;
   }
 }
 
