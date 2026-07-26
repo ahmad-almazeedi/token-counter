@@ -736,6 +736,9 @@ body {
      as a join between two halves of one line, not a gap between two blocks. */
   margin: 0 0.32rem;
   font-size: 2em;
+  /* The glyph sits at the x-height midpoint, which reads high next to a line
+     of caps and ascenders, so it is nudged down onto the optical centre. */
+  vertical-align: -0.08em;
   line-height: 0;
   opacity: 0.45;
 }
