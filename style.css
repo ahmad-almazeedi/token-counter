@@ -671,7 +671,10 @@ body {
   /* One run of centered text, not two flex children: when it has to wrap it
      reflows like a sentence instead of splitting into two ragged columns. */
   display: block;
-  max-width: min(100%, 38rem);
+  /* Wide enough for the whole sentence on one row: at 0.75rem the full line
+     measures ~621px, and 38rem left it 50px short, so it folded on desktop
+     with the width sitting unused on either side. */
+  max-width: min(100%, 46rem);
   padding: 0 1.25rem;
   box-sizing: border-box;
   text-align: center;
