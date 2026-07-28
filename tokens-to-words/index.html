@@ -4,7 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light dark" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://ilostcount.goatcounter.com; connect-src 'self' https://ilostcount.goatcounter.com; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <!-- Same defense-in-depth CSP as the counter, minus the worker it has no
+       need for. The hash covers the inline theme script below. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-awjUEo2iga6r8HqKdI4p1upe99JFYEgBE8OxrNmNSeY=' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://ilostcount.goatcounter.com; connect-src 'self' https://ilostcount.goatcounter.com; object-src 'none'; base-uri 'none'; form-action 'none'" />
   <title>Tokens to Words: How Many Words Is 1,000 Tokens? | iLostCount</title>
   <meta name="description" content="1,000 tokens is about 750 English words. Full tokens-to-words and words-to-tokens conversion tables, plus why the ratio changes with language, code, and numbers." />
   <link rel="canonical" href="https://ilostcount.com/tokens-to-words/" />
@@ -82,91 +84,53 @@
     ]
   }
   </script>
-
-  <style>
-    :root {
-      color-scheme: light dark;
-      --bg: #ffffff;
-      --fg: #16181d;
-      --muted: #5c6270;
-      --line: #e4e6eb;
-      --accent: #2f6df6;
-      --panel: #f6f7f9;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #0f1115;
-        --fg: #e8eaee;
-        --muted: #9aa1ad;
-        --line: #262a32;
-        --accent: #7aa2ff;
-        --panel: #171a20;
-      }
-    }
-    * { box-sizing: border-box; }
-    html { -webkit-text-size-adjust: 100%; }
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--fg);
-      font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      padding: 0 20px;
-    }
-    .wrap { max-width: 720px; margin: 0 auto; padding: 40px 0 64px; }
-    a { color: var(--accent); }
-    h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 12px; letter-spacing: -0.02em; }
-    h2 { font-size: 1.25rem; margin: 40px 0 10px; letter-spacing: -0.01em; }
-    h3 { font-size: 1rem; margin: 26px 0 6px; }
-    p, li { color: var(--fg); }
-    .lede { font-size: 1.05rem; color: var(--muted); margin: 0 0 24px; }
-    .answer {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 16px 18px;
-      margin: 24px 0;
-    }
-    .answer p { margin: 0; }
-    table { border-collapse: collapse; width: 100%; margin: 14px 0 6px; font-variant-numeric: tabular-nums; }
-    th, td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--line); }
-    th:first-child, td:first-child { text-align: left; }
-    th { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); font-weight: 600; }
-    caption { caption-side: bottom; text-align: left; font-size: 0.85rem; color: var(--muted); padding-top: 8px; }
-    .cta {
-      display: inline-block;
-      margin: 8px 0 0;
-      padding: 11px 18px;
-      border-radius: 999px;
-      background: var(--accent);
-      color: #fff;
-      text-decoration: none;
-      font-weight: 600;
-    }
-    nav.crumbs { font-size: 0.9rem; color: var(--muted); margin-bottom: 22px; }
-    footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 0.9rem; color: var(--muted); }
-    @media (max-width: 480px) {
-      h1 { font-size: 1.55rem; }
-      th, td { padding: 7px 6px; font-size: 0.93rem; }
-    }
-  </style>
+  <link rel="stylesheet" href="/style.css?v=20260728-2" />
+  <!-- Set theme before first paint to avoid a flash of the wrong mode -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("theme");
+        if (t === "light" || t === "dark") {
+          document.documentElement.setAttribute("data-theme", t);
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
-  <div class="wrap">
-    <nav class="crumbs"><a href="/">iLostCount</a> &rsaquo; Tokens to words</nav>
+  <div class="top-controls">
+    <button id="themeToggle" class="round-btn" type="button" aria-label="Switch color theme">
+      <span class="theme-toggle__icon round-btn__icon" aria-hidden="true"></span>
+    </button>
+  </div>
 
+  <!-- The same article the counter opens below its canvas, at its own URL:
+       same type, same colours, same way back up at the end of it. -->
+  <article class="about about--page">
     <h1>How many words is 1,000 tokens?</h1>
-    <p class="lede">The short answer, the conversion tables both ways, and the cases where the usual rule of thumb stops holding.</p>
+    <p class="about__lede">
+      The short answer, the conversion tables both ways, and the cases where
+      the usual rule of thumb stops holding.
+    </p>
 
-    <div class="answer">
-      <p><strong>1,000 tokens is about 750 words</strong> of ordinary English, or roughly 4,000 characters. Going the other way, <strong>1,000 words is about 1,333 tokens</strong>.</p>
-    </div>
+    <p class="about__answer">
+      <strong>1,000 tokens is about 750 words</strong> of ordinary English, or
+      roughly 4,000 characters. Going the other way,
+      <strong>1,000 words is about 1,333 tokens</strong>.
+    </p>
 
-    <p>A token is the unit an AI model reads text in. It is usually a short word or a fragment of a longer one, which is why the count never lines up exactly with words. For plain English the ratio is stable enough to plan around: one token averages about four characters, and about three quarters of a word.</p>
+    <p>
+      A token is the unit an AI model reads text in. It is usually a short word
+      or a fragment of a longer one, which is why the count never lines up
+      exactly with words. For plain English the ratio is stable enough to plan
+      around: one token averages about four characters, and about three
+      quarters of a word.
+    </p>
 
-    <p><a class="cta" href="/">Count your own text &rarr;</a></p>
+    <p><a class="about__cta" href="/">Count your own text &rarr;</a></p>
 
     <h2>Tokens to words</h2>
-    <table>
+    <table class="about__table">
       <caption>English prose, at roughly 4 characters per token.</caption>
       <thead>
         <tr><th scope="col">Tokens</th><th scope="col">Words</th><th scope="col">Characters</th></tr>
@@ -185,7 +149,7 @@
     </table>
 
     <h2>Words to tokens</h2>
-    <table>
+    <table class="about__table">
       <caption>Multiply words by about 1.33 to estimate tokens.</caption>
       <thead>
         <tr><th scope="col">Words</th><th scope="col">Tokens</th><th scope="col">Characters</th></tr>
@@ -203,18 +167,44 @@
     </table>
 
     <h2>How many tokens is a page?</h2>
-    <p>A double spaced page runs about 250 words, so roughly <strong>333 tokens</strong>. A single spaced page runs about 500 words, so roughly <strong>667 tokens</strong>. A 10 page report of 5,000 words lands near 6,700 tokens, which still fits comfortably inside any current context window.</p>
+    <p>
+      A double spaced page runs about 250 words, so roughly
+      <strong>333 tokens</strong>. A single spaced page runs about 500 words,
+      so roughly <strong>667 tokens</strong>. A 10 page report of 5,000 words
+      lands near 6,700 tokens, which still fits comfortably inside any current
+      context window.
+    </p>
 
     <h2>When the rule of thumb breaks</h2>
 
     <h3>Other languages</h3>
-    <p>English is the cheapest language per unit of meaning, because tokenizer vocabularies are built mostly from English text. Arabic, Chinese, Japanese, Korean, Thai, and other non Latin scripts split into much shorter pieces, so the same paragraph can cost two to three times as many tokens. If you are budgeting a prompt in one of those languages, do not trust an English ratio.</p>
+    <p>
+      English is the cheapest language per unit of meaning, because tokenizer
+      vocabularies are built mostly from English text. Arabic, Chinese,
+      Japanese, Korean, Thai, and other non Latin scripts split into much
+      shorter pieces, so the same paragraph can cost two to three times as many
+      tokens. If you are budgeting a prompt in one of those languages, do not
+      trust an English ratio.
+    </p>
 
     <h3>Code, numbers, and punctuation</h3>
-    <p>Source code is dense with symbols, indentation, and identifiers that no vocabulary covers whole, so it commonly runs closer to 3 characters per token. Long digit strings are worse still: numbers are split into small chunks, so a table of figures can cost far more than the same space of prose.</p>
+    <p>
+      Source code is dense with symbols, indentation, and identifiers that no
+      vocabulary covers whole, so it commonly runs closer to 3 characters per
+      token. Long digit strings are worse still: numbers are split into small
+      chunks, so a table of figures can cost far more than the same space of
+      prose.
+    </p>
 
     <h3>Different models, different tokenizers</h3>
-    <p>Every model family ships its own tokenizer, so GPT, Claude, Gemini, and Llama will each return a slightly different number for the same sentence. For English prose the spread is small, usually a few percent. For code and non Latin scripts it widens. Any counter that runs outside the model itself, including this one, is giving you an estimate rather than a billing figure.</p>
+    <p>
+      Every model family ships its own tokenizer, so GPT, Claude, Gemini, and
+      Llama will each return a slightly different number for the same sentence.
+      For English prose the spread is small, usually a few percent. For code and
+      non Latin scripts it widens. Any counter that runs outside the model
+      itself, including this one, is giving you an estimate rather than a
+      billing figure.
+    </p>
 
     <h2>Questions</h2>
 
@@ -222,25 +212,51 @@
     <p>About 750 words of plain English, or about 4,000 characters.</p>
 
     <h3>How many tokens is 1,000 words?</h3>
-    <p>About 1,333 tokens. Multiply your word count by roughly 1.33, and by more if the text is heavy with numbers or code.</p>
+    <p>
+      About 1,333 tokens. Multiply your word count by roughly 1.33, and by more
+      if the text is heavy with numbers or code.
+    </p>
 
     <h3>How many tokens is one page of text?</h3>
-    <p>Roughly 333 tokens for a double spaced page, roughly 667 for a single spaced one.</p>
+    <p>
+      Roughly 333 tokens for a double spaced page, roughly 667 for a single
+      spaced one.
+    </p>
 
     <h3>Why does the token count differ between models?</h3>
-    <p>Each model family uses its own tokenizer vocabulary, so the same text splits differently. The gap is small for English prose and much wider for code and non Latin scripts.</p>
+    <p>
+      Each model family uses its own tokenizer vocabulary, so the same text
+      splits differently. The gap is small for English prose and much wider for
+      code and non Latin scripts.
+    </p>
 
     <h3>Do non English languages use more tokens?</h3>
     <p>Usually yes, often two to three times more for the same meaning.</p>
 
     <h2>Count the real number</h2>
-    <p>Rules of thumb are for planning. When you need the count for the text actually in front of you, paste it into the counter: characters, words, lines, paragraphs, tokens, and speaking time all update as you type, in your browser, with nothing uploaded.</p>
-    <p><a class="cta" href="/">Open the counter &rarr;</a></p>
+    <p>
+      Rules of thumb are for planning. When you need the count for the text
+      actually in front of you, paste it into the counter: characters, words,
+      lines, paragraphs, tokens, and speaking time all update as you type, in
+      your browser, with nothing uploaded.
+    </p>
+    <p><a class="about__cta" href="/">Open the counter &rarr;</a></p>
 
-    <footer>
-      <a href="/">iLostCount</a> is a free character, word, and token counter. No ads, no signup, no tracking beyond cookieless page view counts.
-    </footer>
-  </div>
+    <p class="about__note">
+      <a href="/">iLostCount</a> is a free character, word, and token counter.
+      No ads, no signup, no tracking beyond cookieless page view counts.
+    </p>
+
+    <a class="about__close" href="/">
+      <svg class="about__close-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m18 15-6-6-6 6"></path>
+      </svg>
+      <span>Back to the counter</span>
+    </a>
+  </article>
+
+  <script src="/theme.js?v=20260728-1"></script>
+  <!-- GoatCounter: cookieless page view counts, no personal data -->
   <script data-goatcounter="https://ilostcount.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>

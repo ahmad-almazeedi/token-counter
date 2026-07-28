@@ -906,6 +906,133 @@ body {
   margin: 0.15rem 0 0;
 }
 
+/* Links in the copy get the footer's dotted rule rather than the browser's
+   blue, which is the one place colour was leaking into a monochrome page. */
+.about a:not(.about__close):not(.about__cta) {
+  color: color-mix(in srgb, var(--muted) 40%, var(--text));
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  transition: color 0.2s ease;
+}
+
+.about a:not(.about__close):not(.about__cta):hover,
+.about a:not(.about__close):not(.about__cta):focus-visible {
+  color: var(--text);
+}
+
+.about a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* ---------- Reference copy on its own page ---------- */
+/* Same article, same type, same colours. It only drops the hairline, which
+   exists to mark where the canvas ends and has nothing to divide here. */
+.about--page {
+  border-top: 0;
+  padding-top: clamp(2.5rem, 8vh, 5rem);
+}
+
+/* The one answer someone came for, held apart from the prose around it. */
+.about__answer {
+  margin: 1.5rem 0 1.75rem;
+  padding: 0.9rem 1.1rem;
+  background: color-mix(in srgb, var(--surface) 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  border-radius: 12px;
+}
+
+.about__answer strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Numbers, so hairlines and tabular figures do the work a heavier table
+   would otherwise do with fills and rules. */
+.about__table {
+  width: 100%;
+  margin: 0.9rem 0 0.4rem;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
+}
+
+.about__table th,
+.about__table td {
+  padding: 0.5rem 0.6rem;
+  text-align: right;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+}
+
+.about__table th:first-child,
+.about__table td:first-child {
+  text-align: left;
+}
+
+.about__table th {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.about__table td {
+  color: color-mix(in srgb, var(--muted) 40%, var(--text));
+}
+
+.about__table caption {
+  caption-side: bottom;
+  padding-top: 0.5rem;
+  text-align: left;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* The way to the tool from inside the copy. An outline rather than a fill:
+   loud enough to be a target, quiet enough to stay monochrome. */
+.about__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+  padding: 0.5rem 1.05rem;
+  color: color-mix(in srgb, var(--muted) 40%, var(--text));
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.about__cta:hover,
+.about__cta:focus-visible {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--border) 60%, var(--text));
+  background: color-mix(in srgb, var(--surface) 55%, transparent);
+}
+
+/* The sign-off, on the same hairline the article opened without. */
+.about__note {
+  margin: 3rem 0 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  font-size: 0.85rem;
+}
+
+.about--page .about__close {
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 480px) {
+  .about__table th,
+  .about__table td {
+    padding: 0.45rem 0.35rem;
+  }
+}
+
 /* The way back up, since the footer toggle is off-screen by the time you
    have read this far. */
 /* The way back up, since the footer's toggle is far off-screen by the time
@@ -918,6 +1045,9 @@ body {
   padding: 0;
   font: inherit;
   color: inherit;
+  /* A button in the panel, a link on a page: the rule belongs on the span
+     inside either way, never on the element itself. */
+  text-decoration: none;
   background: none;
   border: 0;
   cursor: pointer;
