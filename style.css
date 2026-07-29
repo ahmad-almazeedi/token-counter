@@ -860,7 +860,19 @@ body {
   border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
 }
 
-.about h1 {
+/* Stacked, the article that has another below it gives up most of its bottom
+   air, so the hairline between the two reads as a divider rather than a gap
+   the reader might take for the end of the page. */
+.about:has(+ .about) {
+  padding-bottom: clamp(2.5rem, 7vh, 4rem);
+}
+
+/* The page keeps one h1. The second article opens on an h2 that carries the
+   same weight, since it is the head of its own piece rather than a section
+   of the one above it. */
+/* Held above .about h2 on specificity, since the title is itself an h2. */
+.about h1,
+.about .about__title {
   margin: 0 0 1.25rem;
   color: var(--text);
   font-size: clamp(1.35rem, 3.5vw, 1.75rem);

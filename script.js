@@ -966,11 +966,19 @@ editors.forEach((editor) => {
 });
 
 // ---------- Reference copy ----------
-// Ships collapsed: the canvas keeps the first screen, and scrolling never
+// Two articles ship collapsed below the canvas, in the order their controls
+// appear in the footer. The canvas keeps the first screen, and scrolling never
 // lands you in prose you didn't ask for.
-const aboutEl = document.getElementById("about");
-const aboutToggle = document.getElementById("aboutToggle");
-const aboutClose = document.getElementById("aboutClose");
+const copySections = [
+  {
+    panel: document.getElementById("about"),
+    toggle: document.getElementById("aboutToggle"),
+  },
+  {
+    panel: document.getElementById("tokens"),
+    toggle: document.getElementById("tokensToggle"),
+  },
+];
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 function scrollBehavior() {
@@ -981,39 +989,60 @@ function scrollBehavior() {
 // scroll back to the top can close it again without the opening scroll
 // (which starts at the top) closing it immediately.
 let leftTopWhileOpen = false;
+// The control that opened the copy, so closing hands focus back to the one
+// that was actually pressed.
+let openedBy = copySections[0].toggle;
 
-function openAbout() {
-  aboutEl.hidden = false;
-  aboutToggle.setAttribute("aria-expanded", "true");
-  leftTopWhileOpen = false;
-  aboutEl.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
+function copyIsOpen() {
+  return !copySections[0].panel.hidden;
 }
 
-function closeAbout({ focus = true } = {}) {
+function openCopy(section) {
+  // Both open together. They are one run of reference copy, so reading off
+  // the end of the first and into the second shouldn't need a second click,
+  // and the scroll below is what decides which one you land on.
+  copySections.forEach((other) => {
+    other.panel.hidden = false;
+    other.toggle.setAttribute("aria-expanded", "true");
+  });
+  openedBy = section.toggle;
+  leftTopWhileOpen = false;
+  section.panel.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
+}
+
+function closeCopy({ focus = true } = {}) {
   // Hiding shrinks the document back to a single screen, so the browser
   // clamps the scroll to the top on its own. No animation to chase and no
   // timer that a long smooth scroll could outlast.
-  aboutEl.hidden = true;
-  aboutToggle.setAttribute("aria-expanded", "false");
+  copySections.forEach((section) => {
+    section.panel.hidden = true;
+    section.toggle.setAttribute("aria-expanded", "false");
+  });
   leftTopWhileOpen = false;
-  if (focus) aboutToggle.focus();
+  if (focus) openedBy.focus();
 }
 
-aboutToggle.addEventListener("click", () => {
-  if (aboutEl.hidden) openAbout();
-  else closeAbout();
+copySections.forEach((section) => {
+  section.toggle.addEventListener("click", () => {
+    // Pressing the control you arrived by puts the copy away. Pressing the
+    // other one takes you to its article instead of closing on you.
+    if (copyIsOpen() && openedBy === section.toggle) closeCopy();
+    else openCopy(section);
+  });
 });
 
-aboutClose.addEventListener("click", () => closeAbout());
+document.querySelectorAll(".about__close").forEach((btn) => {
+  btn.addEventListener("click", () => closeCopy());
+});
 
 // Scrolling back to the counter puts the page away again, so the canvas
 // can't be scrolled off by accident without asking for the copy first.
 window.addEventListener(
   "scroll",
   () => {
-    if (aboutEl.hidden) return;
+    if (!copyIsOpen()) return;
     if (window.scrollY > 40) leftTopWhileOpen = true;
-    else if (leftTopWhileOpen) closeAbout({ focus: false });
+    else if (leftTopWhileOpen) closeCopy({ focus: false });
   },
   { passive: true }
 );

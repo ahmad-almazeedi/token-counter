@@ -137,7 +137,7 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="style.css?v=20260728-2" />
+  <link rel="stylesheet" href="style.css?v=20260729-1" />
   <!-- Set theme before first paint to avoid a flash of the wrong mode -->
   <script>
     (function () {
@@ -295,7 +295,9 @@
   <footer class="footer">
     <button id="aboutToggle" class="footer__toggle" type="button" aria-controls="about" aria-expanded="false">
       <span>How the counts work</span>
-    </button><span class="footer__divider" aria-hidden="true">·</span><a class="footer__link" href="/tokens-to-words/">Tokens to words</a><span class="footer__divider" aria-hidden="true">·</span><span class="footer__more"><span
+    </button><span class="footer__divider" aria-hidden="true">·</span><button id="tokensToggle" class="footer__toggle" type="button" aria-controls="tokens" aria-expanded="false">
+      <span>Tokens to words</span>
+    </button><span class="footer__divider" aria-hidden="true">·</span><span class="footer__more"><span
         class="footer__lead">More from </span><span class="footer__lead-short">By </span><a
         class="footer__link" href="https://x.com/ahmad_almazeedi" target="_blank" rel="noopener">the developer</a>: <a
         class="footer__link" href="https://atmita.com" target="_blank" rel="noopener" title="Hire an AI team for your startup">Atmita</a><span
@@ -484,7 +486,91 @@
       result, so the last sentence is wasted if it runs past the limit.
     </p>
 
-    <button id="aboutClose" class="about__close" type="button">
+    <button class="about__close" type="button">
+      <svg class="about__close-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m18 15-6-6-6 6"></path>
+      </svg>
+      <span>Back to the counter</span>
+    </button>
+  </article>
+
+  <!-- The second article, under the first and reached the same way. The short
+       version on purpose: the full guide is its own page, and repeating it
+       word for word would put the same copy on two URLs of the same site. -->
+  <article class="about" id="tokens" hidden>
+    <h2 class="about__title">Tokens to words</h2>
+    <p class="about__lede">
+      The conversion both ways, for sizing a prompt before you send it.
+    </p>
+
+    <p class="about__answer">
+      <strong>1,000 tokens is about 750 words</strong>, or roughly 4,000
+      characters of ordinary English. The other way round,
+      <strong>1,000 words is about 1,333 tokens</strong>.
+    </p>
+
+    <p>
+      A token is the unit a model reads in: usually a short word, or a piece of
+      a longer one. That is why the two counts never line up exactly. For plain
+      English the ratio holds well enough to plan around, at about four
+      characters to a token and three quarters of a word.
+    </p>
+
+    <h3>Tokens into words</h3>
+    <table class="about__table">
+      <caption>English prose, at roughly 4 characters per token.</caption>
+      <thead>
+        <tr><th scope="col">Tokens</th><th scope="col">Words</th><th scope="col">Characters</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>100</td><td>75</td><td>400</td></tr>
+        <tr><td>500</td><td>375</td><td>2,000</td></tr>
+        <tr><td>1,000</td><td>750</td><td>4,000</td></tr>
+        <tr><td>2,000</td><td>1,500</td><td>8,000</td></tr>
+        <tr><td>4,000</td><td>3,000</td><td>16,000</td></tr>
+        <tr><td>8,000</td><td>6,000</td><td>32,000</td></tr>
+        <tr><td>16,000</td><td>12,000</td><td>64,000</td></tr>
+        <tr><td>32,000</td><td>24,000</td><td>128,000</td></tr>
+        <tr><td>128,000</td><td>96,000</td><td>512,000</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Words into tokens</h3>
+    <table class="about__table">
+      <caption>Multiply words by about 1.33 to estimate tokens.</caption>
+      <thead>
+        <tr><th scope="col">Words</th><th scope="col">Tokens</th><th scope="col">Characters</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>100</td><td>133</td><td>533</td></tr>
+        <tr><td>250</td><td>333</td><td>1,333</td></tr>
+        <tr><td>500</td><td>667</td><td>2,667</td></tr>
+        <tr><td>750</td><td>1,000</td><td>4,000</td></tr>
+        <tr><td>1,000</td><td>1,333</td><td>5,333</td></tr>
+        <tr><td>2,000</td><td>2,667</td><td>10,667</td></tr>
+        <tr><td>5,000</td><td>6,667</td><td>26,667</td></tr>
+        <tr><td>10,000</td><td>13,333</td><td>53,333</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Where the ratio stops holding</h3>
+    <p>
+      Code runs denser, nearer three characters per token, and long strings of
+      digits are broken into small pieces, so a table of figures costs more
+      than the same space of prose. Languages in non Latin scripts cost the
+      most: Arabic, Chinese, Japanese, Korean, and Thai can take two to three
+      times the tokens English needs for the same meaning. Model families ship
+      their own tokenizers as well, so one sentence lands on a slightly
+      different number for GPT, Claude, Gemini, and Llama.
+    </p>
+
+    <p>
+      The <a href="/tokens-to-words/">full tokens to words guide</a> has the
+      page counts, the model by model differences, and the rest of the
+      questions.
+    </p>
+
+    <button class="about__close" type="button">
       <svg class="about__close-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="m18 15-6-6-6 6"></path>
       </svg>
@@ -495,7 +581,7 @@
   <script src="markdown.js"></script>
   <!-- Shared with the reference pages, so the toggle behaves the same on both. -->
   <script src="theme.js?v=20260728-1"></script>
-  <script src="script.js?v=20260728-1"></script>
+  <script src="script.js?v=20260729-1"></script>
   <!-- GoatCounter: cookieless page view counts, no personal data -->
   <script data-goatcounter="https://ilostcount.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
