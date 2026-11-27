@@ -826,15 +826,30 @@ body {
   display: none;
 }
 
+/* Phone labels: each control can carry a full and a short wording, and
+   small screens get the short one so the footer always stays one row. */
+.footer__short {
+  display: none;
+}
+
 @media (max-width: 600px) {
-  .footer__lead {
+  .footer__lead,
+  .footer__full {
     display: none;
   }
 
-  .footer__lead-short {
+  .footer__lead-short,
+  .footer__short {
     display: inline;
   }
+
+  /* Never fold: if a label is still too long, the fixes below shrink it
+     rather than letting one word drop onto a second row. */
+  .footer {
+    white-space: nowrap;
+  }
 }
+
 
 /* The last 40px of phone width: a hair smaller and tighter to the edges, which
    is cheaper than dropping the one remaining mention of the developer. */
@@ -842,6 +857,14 @@ body {
   .footer {
     padding: 0 0.75rem;
     font-size: 0.7rem;
+  }
+}
+
+/* The smallest phones still can't fit the credit on one row, so it goes and
+   the product name stays. */
+@media (max-width: 360px) {
+  .footer__credit {
+    display: none;
   }
 }
 
